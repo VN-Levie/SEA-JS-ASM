@@ -41,6 +41,12 @@ function randomElement(arr) {
 }
 
 function findMissingElement(arr1, arr2){
+    //check type
+    if(!Array.isArray(arr1) || !Array.isArray(arr2)){
+        return [];
+    }
+    //check length
+    
     var result = [];
     arr1.forEach(e => {
         var found = false;
