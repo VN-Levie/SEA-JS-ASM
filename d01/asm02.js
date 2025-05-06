@@ -29,7 +29,18 @@ function combination(n, k) {
 }
 
 function rdInRand(min, max){
-
+    // check type
+    if (typeof min !== 'number' || typeof max !== 'number') {
+        return 0;
+    }
+    // check range
+    if (min > max) {
+        return 0;
+    }
+    // check min, max
+    if (min < 0 || max < 0) {
+        return 0;
+    }
     let rd = Math.floor(Math.random() * (max - min + 1)) + min;
     return rd;
 }
