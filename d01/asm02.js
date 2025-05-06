@@ -71,3 +71,4 @@ var arr2 = [1, 2, 3, 4, 5];
 console.log("find missing element in array: " + arr1 + " - " + arr2);
 var result = findMissingElement(arr1, arr2);
 console.log("result: " + result); // 6-10
+//cmd: node asm02.js
