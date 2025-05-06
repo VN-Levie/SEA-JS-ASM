@@ -2,10 +2,22 @@ function formatMoneyString(value) {
     return value.toString().replace(/[0-9](?=([0-9]{3})+(\.|$))/g, '$&,');
 }
 function countWords(str) {
+    //trim 2 đầu
+    str = str.trim();
     let count = 1;
     for (let i = 1; i < str.length; i++) {
         const code = str.charCodeAt(i);
-        if (code >= 65 && code <= 90) count++; // nếu gặp A-Z
+        var isUpperCase = code >= 65 && code <= 90;
+        if (isUpperCase) {
+            nextChar = str.charCodeAt(i + 1);
+            if (nextChar >= 97 && nextChar <= 122) {
+                count++;
+            }
+        }
+    }
+    var fistChar = str.charCodeAt(0);
+    if (fistChar >= 97 && fistChar <= 122) {
+        count++;
     }
     return str.length === 0 ? 0 : count;
 }
