@@ -27,21 +27,26 @@ var Student = function (id, name, age, grade) {
 var students = [];
 var fs = require('fs');
 var fileName = 'students.json';
-var menu = `
-1. Add Student
-2. Display Students
-3. Search Student
-4. Display Statistics
-5. Save Students
-6. Load Students
-7. Exit
+const menu = `
+╔════════════════════════════════════════╗
+║        STUDENT MANAGEMENT MENU         ║
+╠════════════════════════════════════════╣
+║ 1. Add Student                         ║
+║ 2. Display Students                    ║
+║ 3. Search Student                      ║
+║ 4. Display Statistics                  ║
+║ 5. Save Students                       ║
+║ 6. Load Students                       ║
+║ 7. Exit                                ║
+╚════════════════════════════════════════╝
 `;
+
 function displayMenu() {
     console.log("\n-----------------------------");
     console.log(menu);
     // readline.clearLine(process.stdout, 0);
     // console.clear();
-    rl.question("Enter your choice: ", function (choice) {
+    rl.question("🟡 Enter your choice (1–7): ", function (choice) {
         choice = choice.trim();
         console.log();
         // console.log("You selected: " + choice);
