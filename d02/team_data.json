@@ -1,0 +1,168 @@
+{
+  "athletes": [
+    {
+      "name": "A1",
+      "role": "main"
+    },
+    {
+      "name": "C1",
+      "role": "core_team"
+    },
+    {
+      "name": "C2",
+      "role": "core_team"
+    },
+    {
+      "name": "C3",
+      "role": "core_team"
+    },
+    {
+      "name": "C4",
+      "role": "core_team"
+    },
+    {
+      "name": "C5",
+      "role": "core_team"
+    },
+    {
+      "name": "N1",
+      "role": "normal"
+    },
+    {
+      "name": "N10",
+      "role": "normal"
+    },
+    {
+      "name": "N11",
+      "role": "normal"
+    },
+    {
+      "name": "N12",
+      "role": "normal"
+    },
+    {
+      "name": "N13",
+      "role": "normal"
+    },
+    {
+      "name": "N14",
+      "role": "normal"
+    },
+    {
+      "name": "N15",
+      "role": "normal"
+    },
+    {
+      "name": "N16",
+      "role": "normal"
+    },
+    {
+      "name": "N17",
+      "role": "normal"
+    },
+    {
+      "name": "N18",
+      "role": "normal"
+    },
+    {
+      "name": "N19",
+      "role": "normal"
+    },
+    {
+      "name": "N2",
+      "role": "normal"
+    },
+    {
+      "name": "N20",
+      "role": "normal"
+    },
+    {
+      "name": "N21",
+      "role": "normal"
+    },
+    {
+      "name": "N22",
+      "role": "normal"
+    },
+    {
+      "name": "N23",
+      "role": "normal"
+    },
+    {
+      "name": "N24",
+      "role": "normal"
+    },
+    {
+      "name": "N25",
+      "role": "normal"
+    },
+    {
+      "name": "N26",
+      "role": "normal"
+    },
+    {
+      "name": "N27",
+      "role": "normal"
+    },
+    {
+      "name": "N28",
+      "role": "normal"
+    },
+    {
+      "name": "N29",
+      "role": "normal"
+    },
+    {
+      "name": "N3",
+      "role": "normal"
+    },
+    {
+      "name": "N4",
+      "role": "normal"
+    },
+    {
+      "name": "N5",
+      "role": "normal"
+    },
+    {
+      "name": "N6",
+      "role": "normal"
+    },
+    {
+      "name": "N7",
+      "role": "normal"
+    },
+    {
+      "name": "N8",
+      "role": "normal"
+    },
+    {
+      "name": "N9",
+      "role": "normal"
+    },
+    {
+      "name": "S1",
+      "role": "substitute"
+    },
+    {
+      "name": "S2",
+      "role": "substitute"
+    },
+    {
+      "name": "S3",
+      "role": "substitute"
+    },
+    {
+      "name": "S4",
+      "role": "substitute"
+    },
+    {
+      "name": "S5",
+      "role": "substitute"
+    }
+  ],
+  "mustTogetherPairs": [
+    "A1-C2"
+  ],
+  "mustSeparatePairs": []
+}

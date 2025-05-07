@@ -285,7 +285,7 @@ function loadStudents(callback) {
             displayStudents(callback);
         } catch (e) {
             console.log("\n❌ Failed to parse student data: " + e.message);
-            callback();
+          return  callback();
         }
     });
 }

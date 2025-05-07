@@ -17,6 +17,8 @@
 //    - thêm những ràng buộc này trong quá trình chọn đội. 
 //    - HLV có thể thay đổi những điều kiện này trước khi sắp xếp đội hình
 const readline = require("readline");
+const fs = require("fs");
+const DATA_FILE = "team_data.json";
 
 const Roles = {
     MAIN: 'main',
@@ -201,7 +203,44 @@ function generateValidTeamsLogic() {
     return { success: true, teams: result, message: `Found ${result.length} valid team combinations.` };
 }
 
+// --- JSON Save/Load Functions ---
+function saveDataToJson(callback) {
+    const data = {
+        athletes: athletes.map(a => ({ name: a.name, role: a.role })),
+        mustTogetherPairs: Array.from(mustTogetherPairs),
+        mustSeparatePairs: Array.from(mustSeparatePairs)
+    };
+    fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), (err) => {
+        if (err) {
+            logError("Failed to save data: " + err.message);
+        } else {
+            logSuccess(`Data saved to ${DATA_FILE}`);
+        }
+        if (callback) callback();
+    });
+}
 
+function loadDataFromJson(callback) {
+    fs.readFile(DATA_FILE, "utf8", (err, content) => {
+        if (err) {
+            logError(`Failed to load data: ${err.message}`);
+            initAthletesAndConstraints(); // Initialize initial data
+            return callback();
+        }
+        try {
+            const data = JSON.parse(content);
+            athletes = data.athletes.map(a => new Athlete(a.name, a.role));
+            mustTogetherPairs = new Set(data.mustTogetherPairs || []);
+            mustSeparatePairs = new Set(data.mustSeparatePairs || []);
+            logSuccess(`Data loaded from ${DATA_FILE}`);
+        } catch (e) {
+            logError("Invalid data format in JSON file.");
+            initAthletesAndConstraints(); // Initialize initial data
+        }
+        return callback();
+    });
+}
+// --- End JSON Save/Load Functions ---
 
 function handleGenerateTeams(callback) {
     console.log("\n>> Generating Teams <<");
@@ -517,8 +556,19 @@ function handleShowConstraints(callback) {
 }
 
 function handleExit() {
-    logInfo("Exiting Team Management Program. Goodbye!");
-    rl.close();
+
+    rl.question("Do you want to save before exiting? (y/n): ", function (answer) {
+        if (answer.toLowerCase() === 'y') {
+            saveDataToJson(() => {
+                console.log("Exiting the application...");
+                rl.close();
+            });
+        } else {
+            console.log("Exiting the application without saving...");
+            rl.close();
+        }
+    });
+
 }
 
 
@@ -536,10 +586,12 @@ function showMenu() {
     console.log("  [6] Remove 'MUST BE TOGETHER' Pair");
     console.log("  [7] Remove 'MUST NOT BE TOGETHER' Pair");
     console.log("  [8] Show All Constraint Pairs");
-    console.log("  [9] Exit Program");
+    console.log("  [9] Save data to JSON");
+    console.log("  [10] Load data from JSON");
+    console.log("  [11] Exit Program");
     console.log("=============================================");
 
-    rl.question("Enter your choice (0-9): ", (choice) => {
+    rl.question("Enter your choice (0-11): ", (choice) => {
         switch (choice.trim()) {
             case "0": handleGenerateTeams(showMenu); break;
             case "1": handleShowAllAthletes(showMenu); break;
@@ -550,9 +602,11 @@ function showMenu() {
             case "6": handleRemovePair('together', showMenu); break;
             case "7": handleRemovePair('separate', showMenu); break;
             case "8": handleShowConstraints(showMenu); break;
-            case "9": handleExit(); break;
+            case "9": saveDataToJson(showMenu); break;
+            case "10": loadDataFromJson(showMenu); break;
+            case "11": handleExit(); break;
             default:
-                logError("Invalid choice. Please select a number from 0 to 9.");
+                logError("Invalid choice. Please select a number from 0 to 11.");
                 showMenu();
                 break;
         }
@@ -560,5 +614,5 @@ function showMenu() {
 }
 
 // Start the program
-initAthletesAndConstraints(); // Initialize initial data
-showMenu(); // Display the menu for the first time
+
+loadDataFromJson(showMenu); // Display the menu for the first time
