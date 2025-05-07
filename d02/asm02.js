@@ -256,7 +256,10 @@ function handleShowAllAthletes(callback) {
     displayRole(Roles.NORMAL.toUpperCase(), grouped[Roles.NORMAL.toUpperCase()]);
 
     printSectionSeparator();
-    callback();
+    if (callback) {
+        callback();
+    }
+
 }
 
 function handleResetData(callback) {
@@ -270,12 +273,19 @@ function handleResetData(callback) {
 function handleSetAthleteRole(menuCallback) {
     let athleteToChange = null;
 
-    console.log("\n>> Assign Role to Athlete <<");
+    console.log("\n>> Assign Role to Athlete (type !q to return) <<");
+    handleShowAllAthletes();
     printSubSectionSeparator();
 
     function askAthleteName() {
         rl.question("Enter athlete's name to assign role: ", (nameInput) => {
             const name = nameInput.trim();
+            if (name === "!q") {
+                logInfo("Exiting role assignment.");
+                printSectionSeparator();
+                menuCallback();
+                return;
+            }
             if (!name) {
                 logError("Athlete name cannot be empty. Please try again.");
                 askAthleteName();
@@ -297,7 +307,12 @@ function handleSetAthleteRole(menuCallback) {
         rl.question("Assign new role ([m]ain, [c]ore, [s]ub, [n]ormal): ", (roleInput) => {
             let targetRole;
             const roleCleaned = roleInput.toLowerCase().trim();
-
+            if (roleCleaned === "!q") {
+                logInfo("Exiting role assignment.");
+                printSectionSeparator();
+                menuCallback();
+                return;
+            }
             switch (roleCleaned) {
                 case "m": case "main": targetRole = Roles.MAIN; break;
                 case "c": case "core": case "core_team": targetRole = Roles.CORE_TEAM; break;
@@ -332,15 +347,22 @@ function handleAddPair(type, menuCallback) {
     let athleteName1 = null;
     let athleteName2 = null;
 
-    console.log(`\n>> Add ${pairTypeDisplay} Pair <<`);
+    console.log(`\n>> Add ${pairTypeDisplay} Pair (type !q to return) <<`);
     printSubSectionSeparator();
 
     function askFirstName() {
         rl.question("Enter name of first athlete: ", (nameInput) => {
             const name = nameInput.trim();
+
             if (!name) {
                 logError("Athlete name cannot be empty.");
                 askFirstName();
+                return;
+            }
+            if (name === "!q") {
+                logInfo("Exiting pair addition.");
+                printSectionSeparator();
+                menuCallback();
                 return;
             }
             if (!findAthlete(name)) {
@@ -359,6 +381,12 @@ function handleAddPair(type, menuCallback) {
             if (!name) {
                 logError("Athlete name cannot be empty.");
                 askSecondName();
+                return;
+            }
+            if (name === "!q") {
+                logInfo("Exiting pair addition.");
+                printSectionSeparator();
+                menuCallback();
                 return;
             }
             if (!findAthlete(name)) {
@@ -398,7 +426,7 @@ function handleRemovePair(type, menuCallback) {
     let athleteName1 = null;
     let athleteName2 = null;
 
-    console.log(`\n>> Remove ${pairTypeDisplay} Pair <<`);
+    console.log(`\n>> Remove ${pairTypeDisplay} Pair (type !q to return) <<`);
     printSubSectionSeparator();
 
     function askFirstName() {
@@ -407,6 +435,12 @@ function handleRemovePair(type, menuCallback) {
             if (!name) {
                 logError("Athlete name cannot be empty.");
                 askFirstName();
+                return;
+            }
+            if (name === "!q") {
+                logInfo("Exiting pair removal.");
+                printSectionSeparator();
+                menuCallback();
                 return;
             }
             if (!findAthlete(name)) {
@@ -425,6 +459,12 @@ function handleRemovePair(type, menuCallback) {
             if (!name) {
                 logError("Athlete name cannot be empty.");
                 askSecondName();
+                return;
+            }
+            if (name === "!q") {
+                logInfo("Exiting pair removal.");
+                printSectionSeparator();
+                menuCallback();
                 return;
             }
             if (!findAthlete(name)) {
