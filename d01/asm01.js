@@ -50,9 +50,9 @@ function getExtension(filename) {
 }
 // test
 console.log("formatMoneyString(1234567890): " + formatMoneyString(1234567890));
-console.log("formatMoneyString(1234567890): " + formatMoneyString(-1234567890)); 
+console.log("formatMoneyString(1234567890): " + formatMoneyString(-1234567890));
 console.log("formatMoneyShort(1234567890): " + formatMoneyShort(-1234567890));
-console.log("countWords('Hello World!'): " + countWords('Hello World!')); 
-console.log("countWords('getHTTPResponse'): " + countWords('getHTTPResponse')); 
-console.log("getExtension('file.txt'): " + getExtension('file.txt')); 
+console.log("countWords('Hello World!'): " + countWords('Hello World!'));
+console.log("countWords('getHTTPResponse'): " + countWords('getHTTPResponse'));
+console.log("getExtension('file.txt'): " + getExtension('file.txt'));
 console.log("getExtension('file'): " + getExtension('file')); 
