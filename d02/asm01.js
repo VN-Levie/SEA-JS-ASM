@@ -81,7 +81,6 @@ function addStudent(callback) {
 
     function askId() {
         rl.question("Enter student ID: ", function (input) {
-            2
             while (true) {
                 if (!input.trim()) {
                     console.log("❌ ID cannot be empty.");
@@ -250,9 +249,9 @@ function loadStudents(callback) {
                 return displayMenu();
             }
 
-           
+
             students = parsed;
-            if(students.length === 0){
+            if (students.length === 0) {
                 console.log("\n❌ No students found in the file.");
                 return displayMenu();
             }
