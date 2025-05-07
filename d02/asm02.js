@@ -570,6 +570,92 @@ function handleExit() {
     });
 
 }
+function handleValidateTeam(menuCallback) {
+    const teamToValidate = []; 
+
+    console.log("\n>> Validate Team (3 members) <<");
+    printSubSectionSeparator();
+
+    function askForTeamMember(memberNumber) {
+        const promptText = `Enter name of team member ${memberNumber} (out of 3): `;
+
+        rl.question(promptText, (nameInput) => {
+            const name = nameInput.trim();
+
+            if (!name) {
+                logError("Athlete name cannot be empty. Please try again.");
+                askForTeamMember(memberNumber);
+                return;
+            }
+
+            const athlete = findAthlete(name);
+            if (!athlete) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askForTeamMember(memberNumber);
+                return;
+            }
+
+            
+            if (teamToValidate.some(a => a.name === athlete.name)) {
+                logError(`Athlete "${name}" has already been added to this team. Please enter a different name.`);
+                askForTeamMember(memberNumber);
+                return;
+            }
+
+            teamToValidate.push(athlete); 
+
+            if (teamToValidate.length < 3) {
+                askForTeamMember(memberNumber + 1); 
+            } else {               
+                processTeamValidation();
+            }
+        });
+    }
+
+    function processTeamValidation() {       
+        logInfo("Team to validate: " + teamToValidate.map(a => a.toString()).join(" | "));
+
+        if (isValidTeam(teamToValidate)) { // Sử dụng hàm isValidTeam của bạn
+            logSuccess("This team is VALID and can play according to the rules.");
+        } else {
+            logError("This team is INVALID due to role requirements or constraints.");
+           
+            const main = teamToValidate.find(p => p.role === Roles.MAIN);
+            const core = teamToValidate.find(p => p.role === Roles.CORE_TEAM);
+            const sub = teamToValidate.find(p => p.role === Roles.SUBSTITUTE);
+
+            if (!main) logWarning("- Missing a MAIN player.");
+            if (!core) logWarning("- Missing a CORE_TEAM player.");
+            if (!sub) logWarning("- Missing a SUBSTITUTE player.");        
+            if (main && core && sub) { 
+                if (!checkMustTogether(teamToValidate)) logWarning("- Fails 'MUST BE TOGETHER' constraint for some pair.");
+                if (!checkMustSeparate(teamToValidate)) logWarning("- Fails 'MUST NOT BE TOGETHER' constraint for some pair.");
+            }
+        }
+        printSectionSeparator();
+        menuCallback();
+    }  
+    askForTeamMember(1);
+}
+
+
+function isValidTeam(team) { 
+    if (team.length !== 3) return false;
+
+    const mainPlayer = team.find(p => p.role === Roles.MAIN);
+    const corePlayer = team.find(p => p.role === Roles.CORE_TEAM);
+    const substitutePlayer = team.find(p => p.role === Roles.SUBSTITUTE);
+   
+    if (!mainPlayer || !corePlayer || !substitutePlayer) {
+        return false;
+    }
+
+    if (!checkMustTogether(team) || !checkMustSeparate(team)) {
+        return false;
+    }
+
+    return true;
+}
 
 
 function showMenu() {
@@ -588,7 +674,8 @@ function showMenu() {
     console.log("  [8] Show All Constraint Pairs");
     console.log("  [9] Save data to JSON");
     console.log("  [10] Load data from JSON");
-    console.log("  [11] Exit Program");
+    console.log("  [11] Validate Team (3 members)");
+    console.log("  [e] Exit Program");
     console.log("=============================================");
 
     rl.question("Enter your choice (0-11): ", (choice) => {
@@ -604,7 +691,8 @@ function showMenu() {
             case "8": handleShowConstraints(showMenu); break;
             case "9": saveDataToJson(showMenu); break;
             case "10": loadDataFromJson(showMenu); break;
-            case "11": handleExit(); break;
+            case "11": handleValidateTeam(); break;
+            case "e": handleExit(); break;
             default:
                 logError("Invalid choice. Please select a number from 0 to 11.");
                 showMenu();
