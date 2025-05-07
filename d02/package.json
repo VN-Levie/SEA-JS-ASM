@@ -4,6 +4,7 @@
   "main": "asm01.js",
   "scripts": {
     "start": "node asm01.js",
+    "02": "node asm02.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
