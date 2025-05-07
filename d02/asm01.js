@@ -169,6 +169,11 @@ function addStudent(callback) {
 
 function searchStudent(callback) {
     rl.question("Enter student name to search: ", function (name) {
+        //check empty
+        if (!name.trim()) {
+            console.log("\n❌ Name cannot be empty.");
+            return searchStudent(callback);
+        }
         var foundStudents = students.filter(function (student) {
             return student.name.toLowerCase().includes(name.toLowerCase());
         });
