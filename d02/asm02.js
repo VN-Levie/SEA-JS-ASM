@@ -615,7 +615,7 @@ function handleValidateTeam(menuCallback) {
     function processTeamValidation() {       
         logInfo("Team to validate: " + teamToValidate.map(a => a.toString()).join(" | "));
 
-        if (isValidTeam(teamToValidate)) { // Sử dụng hàm isValidTeam của bạn
+        if (isValidTeam(teamToValidate)) { 
             logSuccess("This team is VALID and can play according to the rules.");
         } else {
             logError("This team is INVALID due to role requirements or constraints.");
@@ -673,8 +673,8 @@ function showMenu() {
     console.log("  [7] Remove 'MUST NOT BE TOGETHER' Pair");
     console.log("  [8] Show All Constraint Pairs");
     console.log("  [9] Save data to JSON");
-    console.log("  [10] Load data from JSON");
-    console.log("  [11] Validate Team (3 members)");
+    console.log(" [10] Load data from JSON");
+    console.log(" [11] Validate Team (3 members)");
     console.log("  [e] Exit Program");
     console.log("=============================================");
 
