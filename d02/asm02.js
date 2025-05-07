@@ -103,7 +103,7 @@ function setAthleteRoleLogic(name, newRole) {
         }
         const currentMainAthlete = athletes.find(a => a.role === Roles.MAIN);
         if (currentMainAthlete && currentMainAthlete !== targetAthlete) {
-            currentMainAthlete.role = Roles.NORMAL; 
+            currentMainAthlete.role = Roles.NORMAL;
         }
         targetAthlete.role = Roles.MAIN;
         let message = `Assigned ${Roles.MAIN.toUpperCase()} to ${targetAthlete.name}.`;
@@ -140,7 +140,7 @@ function removePairFromSetLogic(set, aName, bName) {
     if (!findAthlete(aName) || !findAthlete(bName)) {
         return { success: false, message: "One or both athlete names do not exist to remove from pair." };
     }
-     if (aName === bName) {
+    if (aName === bName) {
         return { success: false, message: "Invalid athlete name for removal." };
     }
     const key = createKey(aName, bName);
@@ -216,7 +216,7 @@ function handleGenerateTeams(callback) {
         } else {
             logSuccess(`Found ${result.teams.length} valid team combinations:`);
             result.teams.forEach((team, index) => {
-                const teamString = team.map(p => p.toString()).join(" | "); // toString() now includes UPPERCASE role
+                const teamString = team.map(p => p.toString()).join(" | ");
                 console.log(`  Team ${index + 1}: ${teamString}`);
             });
         }
@@ -234,8 +234,8 @@ function handleShowAllAthletes(callback) {
         [Roles.SUBSTITUTE.toUpperCase()]: [],
         [Roles.NORMAL.toUpperCase()]: [],
     };
-    
-    athletes.sort((a,b) => a.name.localeCompare(b.name)); // Sort for better readability
+
+    athletes.sort((a, b) => a.name.localeCompare(b.name));
 
     for (const a of athletes) grouped[a.role.toUpperCase()].push(a.name);
 
@@ -254,7 +254,7 @@ function handleShowAllAthletes(callback) {
     displayRole(Roles.CORE_TEAM.toUpperCase(), grouped[Roles.CORE_TEAM.toUpperCase()]);
     displayRole(Roles.SUBSTITUTE.toUpperCase(), grouped[Roles.SUBSTITUTE.toUpperCase()]);
     displayRole(Roles.NORMAL.toUpperCase(), grouped[Roles.NORMAL.toUpperCase()]);
-    
+
     printSectionSeparator();
     callback();
 }
@@ -262,89 +262,203 @@ function handleShowAllAthletes(callback) {
 function handleResetData(callback) {
     console.log("\n>> Resetting Data <<");
     printSubSectionSeparator();
-    initAthletesAndConstraints(); // This function already logs its success
+    initAthletesAndConstraints();
     printSectionSeparator();
     callback();
 }
 
-function handleSetAthleteRole(callback) {
+function handleSetAthleteRole(menuCallback) {
+    let athleteToChange = null;
+
     console.log("\n>> Assign Role to Athlete <<");
     printSubSectionSeparator();
-    rl.question("Enter athlete's name: ", (nameInput) => {
-        const name = nameInput.trim();
-        const athlete = findAthlete(name);
-        if (!athlete) {
-            logError(`Athlete named "${name}" not found.`);
-            printSectionSeparator();
-            callback();
-            return;
-        }
-        logInfo(`Athlete: ${athlete.name}, Current role: ${athlete.role.toUpperCase()}`);
+
+    function askAthleteName() {
+        rl.question("Enter athlete's name to assign role: ", (nameInput) => {
+            const name = nameInput.trim();
+            if (!name) {
+                logError("Athlete name cannot be empty. Please try again.");
+                askAthleteName();
+                return;
+            }
+            const foundAthlete = findAthlete(name);
+            if (!foundAthlete) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askAthleteName();
+                return;
+            }
+            athleteToChange = foundAthlete;
+            logInfo(`Athlete: ${athleteToChange.name}, Current role: ${athleteToChange.role.toUpperCase()}`);
+            askNewRole();
+        });
+    }
+
+    function askNewRole() {
         rl.question("Assign new role ([m]ain, [c]ore, [s]ub, [n]ormal): ", (roleInput) => {
             let targetRole;
-            switch (roleInput.toLowerCase().trim()) {
+            const roleCleaned = roleInput.toLowerCase().trim();
+
+            switch (roleCleaned) {
                 case "m": case "main": targetRole = Roles.MAIN; break;
                 case "c": case "core": case "core_team": targetRole = Roles.CORE_TEAM; break;
                 case "s": case "sub": case "substitute": targetRole = Roles.SUBSTITUTE; break;
                 case "n": case "normal": targetRole = Roles.NORMAL; break;
                 default:
-                    logError("Invalid role selected.");
-                    printSectionSeparator();
-                    callback();
+                    logError("Invalid role selected. Please use 'm', 'c', 's', or 'n', or the full role name.");
+                    askNewRole();
                     return;
             }
-            const result = setAthleteRoleLogic(name, targetRole);
-            if (result.success) logSuccess(result.message);
-            else logError(result.message);
+
+
+            const result = setAthleteRoleLogic(athleteToChange.name, targetRole);
+            if (result.success) {
+                logSuccess(result.message);
+            } else {
+                logError(result.message);
+            }
             printSectionSeparator();
-            callback();
+            menuCallback();
         });
-    });
+    }
+
+    askAthleteName();
 }
 
-function handleAddPair(type, callback) {
+function handleAddPair(type, menuCallback) {
     const pairTypeDisplay = type === 'together' ? "MUST BE TOGETHER" : "MUST NOT BE TOGETHER";
     const set = type === 'together' ? mustTogetherPairs : mustSeparatePairs;
     const oppositeSet = type === 'together' ? mustSeparatePairs : mustTogetherPairs;
 
+    let athleteName1 = null;
+    let athleteName2 = null;
+
     console.log(`\n>> Add ${pairTypeDisplay} Pair <<`);
     printSubSectionSeparator();
-    rl.question("Enter name of first athlete: ", (aNameInput) => {
-        const aName = aNameInput.trim();
-        rl.question("Enter name of second athlete: ", (bNameInput) => {
-            const bName = bNameInput.trim();
-            const result = addPairToSetLogic(set, aName, bName, oppositeSet);
-            if (result.success) logSuccess(result.message);
-            else logError(result.message);
-            printSectionSeparator();
-            callback();
+
+    function askFirstName() {
+        rl.question("Enter name of first athlete: ", (nameInput) => {
+            const name = nameInput.trim();
+            if (!name) {
+                logError("Athlete name cannot be empty.");
+                askFirstName();
+                return;
+            }
+            if (!findAthlete(name)) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askFirstName();
+                return;
+            }
+            athleteName1 = name;
+            askSecondName();
         });
-    });
+    }
+
+    function askSecondName() {
+        rl.question(`Enter name of second athlete (must be different from ${athleteName1}): `, (nameInput) => {
+            const name = nameInput.trim();
+            if (!name) {
+                logError("Athlete name cannot be empty.");
+                askSecondName();
+                return;
+            }
+            if (!findAthlete(name)) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askSecondName();
+                return;
+            }
+            if (name === athleteName1) {
+                logError(`Second athlete cannot be the same as the first one ("${athleteName1}"). Please enter a different name.`);
+                askSecondName();
+                return;
+            }
+            athleteName2 = name;
+            processPairAddition();
+        });
+    }
+
+    function processPairAddition() {
+        const result = addPairToSetLogic(set, athleteName1, athleteName2, oppositeSet);
+        if (result.success) {
+            logSuccess(result.message);
+        } else {
+            logError(result.message);
+        }
+        printSectionSeparator();
+        menuCallback();
+    }
+
+    askFirstName();
 }
 
-function handleRemovePair(type, callback) {
+
+function handleRemovePair(type, menuCallback) {
     const pairTypeDisplay = type === 'together' ? "MUST BE TOGETHER" : "MUST NOT BE TOGETHER";
     const set = type === 'together' ? mustTogetherPairs : mustSeparatePairs;
 
+    let athleteName1 = null;
+    let athleteName2 = null;
+
     console.log(`\n>> Remove ${pairTypeDisplay} Pair <<`);
     printSubSectionSeparator();
-    rl.question("Enter name of first athlete in pair: ", (aNameInput) => {
-        const aName = aNameInput.trim();
-        rl.question("Enter name of second athlete in pair: ", (bNameInput) => {
-            const bName = bNameInput.trim();
-            const result = removePairFromSetLogic(set, aName, bName);
-            if (result.success) logSuccess(result.message);
-            else logError(result.message);
-            printSectionSeparator();
-            callback();
-        });
-    });
-}
 
+    function askFirstName() {
+        rl.question("Enter name of first athlete in pair to remove: ", (nameInput) => {
+            const name = nameInput.trim();
+            if (!name) {
+                logError("Athlete name cannot be empty.");
+                askFirstName();
+                return;
+            }
+            if (!findAthlete(name)) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askFirstName();
+                return;
+            }
+            athleteName1 = name;
+            askSecondName();
+        });
+    }
+
+    function askSecondName() {
+        rl.question(`Enter name of second athlete in pair to remove (must be different from ${athleteName1}): `, (nameInput) => {
+            const name = nameInput.trim();
+            if (!name) {
+                logError("Athlete name cannot be empty.");
+                askSecondName();
+                return;
+            }
+            if (!findAthlete(name)) {
+                logError(`Athlete named "${name}" not found. Please try again.`);
+                askSecondName();
+                return;
+            }
+            if (name === athleteName1) {
+                logError(`Second athlete cannot be the same as the first one ("${athleteName1}") for removal. Please enter a different name.`);
+                askSecondName();
+                return;
+            }
+            athleteName2 = name;
+            processPairRemoval();
+        });
+    }
+
+    function processPairRemoval() {
+        const result = removePairFromSetLogic(set, athleteName1, athleteName2);
+        if (result.success) {
+            logSuccess(result.message);
+        } else {
+            logError(result.message);
+        }
+        printSectionSeparator();
+        menuCallback();
+    }
+
+    askFirstName();
+}
 function handleShowConstraints(callback) {
     console.log("\n>> Constraint Pairs <<");
     printSubSectionSeparator();
-    
+
     console.log("MUST BE TOGETHER pairs:");
     if (mustTogetherPairs.size === 0) {
         console.log("  (No 'must be together' pairs defined)");
