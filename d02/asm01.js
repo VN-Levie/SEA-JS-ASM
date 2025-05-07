@@ -42,6 +42,7 @@ function displayMenu() {
     // readline.clearLine(process.stdout, 0);
     // console.clear();
     rl.question("Enter your choice: ", function (choice) {
+        choice = choice.trim();
         console.log();
         // console.log("You selected: " + choice);
         switch (choice) {
