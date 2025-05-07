@@ -252,6 +252,10 @@ function loadStudents(callback) {
 
            
             students = parsed;
+            if(students.length === 0){
+                console.log("\n❌ No students found in the file.");
+                return displayMenu();
+            }
             console.log("\n✅ Students loaded successfully.");
             displayStudents(callback);
         } catch (e) {
