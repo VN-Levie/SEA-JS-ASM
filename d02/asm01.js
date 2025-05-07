@@ -178,7 +178,7 @@ function searchStudent(callback) {
 function displayStudents(callback) {
     if (students.length === 0) {
         console.log("\nNo students found.");
-        return;
+        return callback();;
     }
     console.log("Student List:");
     console.log("-------------------------------");
@@ -237,16 +237,29 @@ function saveStudents(callback) {
 function loadStudents(callback) {
     fs.readFile(fileName, 'utf8', function (err, data) {
         if (err) {
-            console.log("\nError loading students: " + err);
-            callback();
-        } else {
-            students = JSON.parse(data);
-            console.log("\nStudents loaded successfully.");
+            console.log("\n❌ Error loading students: " + err.message);
+            return displayMenu();
+        }
+
+        try {
+            const parsed = JSON.parse(data);
+
+            if (!Array.isArray(parsed)) {
+                // throw new Error("Data format invalid: expected an array.");
+                console.log("\n❌ Data format invalid: expected an array.");
+                return displayMenu();
+            }
+
+           
+            students = parsed;
+            console.log("\n✅ Students loaded successfully.");
             displayStudents(callback);
-            // callback();
+        } catch (e) {
+            console.log("\n❌ Failed to parse student data: " + e.message);
+            callback();
         }
     });
-
 }
+
 // Start the application
-displayMenu();
+loadStudents(displayMenu);
