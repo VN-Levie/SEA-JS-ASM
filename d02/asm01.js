@@ -86,7 +86,7 @@ function exitApp() {
                 rl.close();
             });
         } else {
-            console.log("Exiting the application...");
+            console.log("Exiting the application without saving...");
             rl.close();
         }
     });
