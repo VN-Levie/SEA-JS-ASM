@@ -64,8 +64,9 @@ function displayMenu() {
                 loadStudents(displayMenu);
                 break;
             case '7':
-                console.log("Exiting the application...");
-                rl.close();
+                exitApp();
+                // console.log("Exiting the application...");
+                // rl.close();
                 break;
             default:
                 console.log("Invalid choice. Please try again.");
@@ -73,6 +74,20 @@ function displayMenu() {
         }
 
 
+    });
+}
+
+function exitApp() {
+    rl.question("Do you want to save before exiting? (y/n): ", function (answer) {
+        if (answer.toLowerCase() === 'y') {
+            saveStudents(function () {
+                console.log("Exiting the application...");
+                rl.close();
+            });
+        } else {
+            console.log("Exiting the application...");
+            rl.close();
+        }
     });
 }
 
