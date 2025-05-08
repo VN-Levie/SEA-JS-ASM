@@ -571,9 +571,9 @@ function handleExit() {
 
 }
 function handleValidateTeam(menuCallback) {
-    const teamToValidate = []; 
+    const teamToValidate = [];
 
-    console.log("\n>> Validate Team (3 members) <<");
+    console.log("\n>> Validate Team (3 members) (type !q to return) <<");
     printSubSectionSeparator();
 
     function askForTeamMember(memberNumber) {
@@ -587,6 +587,12 @@ function handleValidateTeam(menuCallback) {
                 askForTeamMember(memberNumber);
                 return;
             }
+            if (name === "!q") {
+                logInfo("Exiting team validation.");
+                printSectionSeparator();
+                menuCallback();
+                return;
+            }
 
             const athlete = findAthlete(name);
             if (!athlete) {
@@ -595,57 +601,57 @@ function handleValidateTeam(menuCallback) {
                 return;
             }
 
-            
+
             if (teamToValidate.some(a => a.name === athlete.name)) {
                 logError(`Athlete "${name}" has already been added to this team. Please enter a different name.`);
                 askForTeamMember(memberNumber);
                 return;
             }
 
-            teamToValidate.push(athlete); 
+            teamToValidate.push(athlete);
 
             if (teamToValidate.length < 3) {
-                askForTeamMember(memberNumber + 1); 
-            } else {               
+                askForTeamMember(memberNumber + 1);
+            } else {
                 processTeamValidation();
             }
         });
     }
 
-    function processTeamValidation() {       
+    function processTeamValidation() {
         logInfo("Team to validate: " + teamToValidate.map(a => a.toString()).join(" | "));
 
-        if (isValidTeam(teamToValidate)) { 
+        if (isValidTeam(teamToValidate)) {
             logSuccess("This team is VALID and can play according to the rules.");
         } else {
             logError("This team is INVALID due to role requirements or constraints.");
-           
+
             const main = teamToValidate.find(p => p.role === Roles.MAIN);
             const core = teamToValidate.find(p => p.role === Roles.CORE_TEAM);
             const sub = teamToValidate.find(p => p.role === Roles.SUBSTITUTE);
 
             if (!main) logWarning("- Missing a MAIN player.");
             if (!core) logWarning("- Missing a CORE_TEAM player.");
-            if (!sub) logWarning("- Missing a SUBSTITUTE player.");        
-            if (main && core && sub) { 
+            if (!sub) logWarning("- Missing a SUBSTITUTE player.");
+            if (main && core && sub) {
                 if (!checkMustTogether(teamToValidate)) logWarning("- Fails 'MUST BE TOGETHER' constraint for some pair.");
                 if (!checkMustSeparate(teamToValidate)) logWarning("- Fails 'MUST NOT BE TOGETHER' constraint for some pair.");
             }
         }
         printSectionSeparator();
         menuCallback();
-    }  
+    }
     askForTeamMember(1);
 }
 
 
-function isValidTeam(team) { 
+function isValidTeam(team) {
     if (team.length !== 3) return false;
 
     const mainPlayer = team.find(p => p.role === Roles.MAIN);
     const corePlayer = team.find(p => p.role === Roles.CORE_TEAM);
     const substitutePlayer = team.find(p => p.role === Roles.SUBSTITUTE);
-   
+
     if (!mainPlayer || !corePlayer || !substitutePlayer) {
         return false;
     }
