@@ -98,6 +98,9 @@ class Library {
         const user = this.getUserById(userId);
         if (!book || !user)
             return false;
+        if (book.minAge && user.age < book.minAge) {
+            return `User does not meet the minimum age requirement (${book.minAge}+).`;
+        }
         if (book.borrowedCount >= book.copies)
             return false;
         if (book.borrowedBy && book.borrowedBy.includes(userId))

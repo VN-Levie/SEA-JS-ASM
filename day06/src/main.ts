@@ -43,9 +43,11 @@ async function listBooks(callback: () => void) {
                 return user ? user.name : `User#${uid}`;
             }).join(', ');
         }
+        let title = b.title;
+        if (b.minAge) title += ` (${b.minAge}+)`;
         table.push([
             b.id,
-            b.title,
+            title,
             b.author,
             available,
             b.copies,
@@ -175,9 +177,11 @@ async function searchBooks(callback: () => void) {
                         return user ? user.name : `User#${uid}`;
                     }).join(', ');
                 }
+                let title = b.title;
+                if (b.minAge) title += ` (${b.minAge}+)`;
                 table.push([
                     b.id,
-                    b.title,
+                    title,
                     b.author,
                     available,
                     b.copies,
@@ -213,9 +217,11 @@ async function listBorrowedBooks(callback: () => void) {
                 }).join(', ');
             }
             const available = b.copies - b.borrowedCount;
+            let title = b.title;
+            if (b.minAge) title += ` (${b.minAge}+)`;
             table.push([
                 b.id,
-                b.title,
+                title,
                 b.author,
                 available,
                 b.copies,

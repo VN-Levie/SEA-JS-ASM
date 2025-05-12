@@ -175,9 +175,14 @@ function returnBook(callback) {
 function listUsers(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const users = lib.listUsers();
-        users.forEach(u => {
-            console.log(`#${u.id} - ${u.name}`);
+        const table = new cli_table3_1.default({
+            head: ['ID', 'Name', 'Age'],
+            colWidths: [5, 30, 8]
         });
+        users.forEach(u => {
+            table.push([u.id, u.name, u.age]);
+        });
+        console.log(table.toString());
         callback();
     });
 }
@@ -185,7 +190,8 @@ function addUser(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const userId = parseInt(yield prompt('Enter user ID: '));
         const name = yield prompt('Enter user name: ');
-        lib.addUser({ id: userId, name });
+        const age = parseInt(yield prompt('Enter user age: '));
+        lib.addUser({ id: userId, name, age });
         console.log('User added.');
         callback();
     });
