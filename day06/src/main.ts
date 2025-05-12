@@ -2,6 +2,7 @@ import { Library, User } from './Library';
 import { BookStatus, Book } from './Book';
 import * as readline from 'readline';
 import Table from 'cli-table3';
+import chalk from 'chalk';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -11,17 +12,20 @@ const rl = readline.createInterface({
 const lib = new Library();
 
 function showMenu() {
-    console.log('\n=== Library Menu ===');
-    console.log('1. List books');
-    console.log('2. Add book');
-    console.log('3. Borrow book');
-    console.log('4. Return book');
-    console.log('5. List users');
-    console.log('6. Add user');
-    console.log('7. Search books');
-    console.log('8. List borrowed books');
-    console.log('9. Check user debts');
-    console.log('0. Exit');
+    console.log(chalk.greenBright('\n==============================='));
+    console.log(chalk.bold.bgBlueBright('        📚 LIBRARY MENU 📚      '));
+    console.log(chalk.greenBright('==============================='));
+    console.log(chalk.yellowBright('1.') + ' List books');
+    console.log(chalk.yellowBright('2.') + ' Add book');
+    console.log(chalk.yellowBright('3.') + ' Borrow book');
+    console.log(chalk.yellowBright('4.') + ' Return book');
+    console.log(chalk.yellowBright('5.') + ' List users');
+    console.log(chalk.yellowBright('6.') + ' Add user');
+    console.log(chalk.yellowBright('7.') + ' Search books');
+    console.log(chalk.yellowBright('8.') + ' List borrowed books');
+    console.log(chalk.yellowBright('9.') + ' Check user debts');
+    console.log(chalk.yellowBright('0.') + ' Exit');
+    console.log(chalk.greenBright('==============================='));
 }
 
 function prompt(question: string): Promise<string> {
@@ -31,7 +35,7 @@ function prompt(question: string): Promise<string> {
 async function listBooks(callback: () => void) {
     const books = lib.list();
     const table = new Table({
-        head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+        head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
         colWidths: [5, 30, 20, 10, 8, 30]
     });
     books.forEach(b => {
@@ -55,6 +59,7 @@ async function listBooks(callback: () => void) {
         ]);
     });
     console.log(table.toString());
+    console.log(chalk.greenBright('---------------------------------'));
     callback();
 }
 
@@ -64,7 +69,7 @@ async function addBook(callback: () => void) {
     const author = await prompt('Enter author: ');
     const copies = parseInt(await prompt('Enter number of copies: '));
     lib.addBook({ id, title, author, copies, borrowedCount: 0, borrowedBy: [] });
-    console.log('Book added.');
+    console.log(chalk.greenBright('✔ Book added.'));
     callback();
 }
 
@@ -73,11 +78,11 @@ async function borrowBook(callback: () => void) {
     const borrowerId = parseInt(await prompt('Enter your user ID: '));
     const result = lib.borrowBook(bid, borrowerId);
     if (result === true) {
-        console.log('Book borrowed.');
+        console.log(chalk.greenBright('✔ Book borrowed.'));
     } else if (typeof result === 'string') {
-        console.log('Cannot borrow this book:', result);
+        console.log(chalk.redBright('✖ Cannot borrow this book:'), chalk.yellow(result));
     } else {
-        console.log('Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.');
+        console.log(chalk.redBright('✖ Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.'));
     }
     callback();
 }
@@ -91,14 +96,13 @@ async function returnBook(callback: () => void) {
     const returnerId = parseInt(returnerIdInput);
     const user = lib.getUserById(returnerId);
     if (!user) {
-        console.log('User not found.');
+        console.log(chalk.redBright('✖ User not found.'));
         callback();
         return;
     }
-    // Liệt kê sách user đang mượn
     const borrowedBooks = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
     if (borrowedBooks.length === 0) {
-        console.log('You have not borrowed any books.');
+        console.log(chalk.yellowBright('You have not borrowed any books.'));
         callback();
         return;
     }
@@ -118,9 +122,9 @@ async function returnBook(callback: () => void) {
     }
     const rid = parseInt(ridInput);
     if (lib.returnBook(rid, returnerId)) {
-        console.log('Book returned.');
+        console.log(chalk.greenBright('✔ Book returned.'));
     } else {
-        console.log('Cannot return this book. Make sure you have borrowed it.');
+        console.log(chalk.redBright('✖ Cannot return this book. Make sure you have borrowed it.'));
     }
     callback();
 }
@@ -128,13 +132,14 @@ async function returnBook(callback: () => void) {
 async function listUsers(callback: () => void) {
     const users = lib.listUsers();
     const table = new Table({
-        head: ['ID', 'Name', 'Age'],
+        head: [chalk.cyanBright('ID'), chalk.cyanBright('Name'), chalk.cyanBright('Age')],
         colWidths: [5, 30, 8]
     });
     users.forEach(u => {
         table.push([u.id, u.name, u.age]);
     });
     console.log(table.toString());
+    console.log(chalk.greenBright('---------------------------------'));
     callback();
 }
 
@@ -143,7 +148,7 @@ async function addUser(callback: () => void) {
     const name = await prompt('Enter user name: ');
     const age = parseInt(await prompt('Enter user age: '));
     lib.addUser({ id: userId, name, age });
-    console.log('User added.');
+    console.log(chalk.greenBright('✔ User added.'));
     callback();
 }
 
@@ -162,10 +167,10 @@ async function searchBooks(callback: () => void) {
             b.author.toLowerCase().includes(keyword)
         );
         if (books.length === 0) {
-            console.log('No books found.');
+            console.log(chalk.yellowBright('No books found.'));
         } else {
             const table = new Table({
-                head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
                 colWidths: [5, 30, 20, 10, 8, 30]
             });
             books.forEach(b => {
@@ -189,6 +194,7 @@ async function searchBooks(callback: () => void) {
                 ]);
             });
             console.log(table.toString());
+            console.log(chalk.greenBright('---------------------------------'));
         }
     }
     callback();
@@ -197,10 +203,10 @@ async function searchBooks(callback: () => void) {
 async function listBorrowedBooks(callback: () => void) {
     const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
     if (books.length === 0) {
-        console.log('No books are currently borrowed.');
+        console.log(chalk.yellowBright('No books are currently borrowed.'));
     } else {
         const table = new Table({
-            head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+            head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
             colWidths: [5, 30, 20, 10, 8, 30]
         });
         books.forEach(b => {
@@ -229,6 +235,7 @@ async function listBorrowedBooks(callback: () => void) {
             ]);
         });
         console.log(table.toString());
+        console.log(chalk.greenBright('---------------------------------'));
     }
     callback();
 }
@@ -237,15 +244,15 @@ async function checkUserDebts(callback: () => void) {
     const userId = parseInt(await prompt('Enter user ID to check: '));
     const user = lib.getUserById(userId);
     if (!user) {
-        console.log('User not found.');
+        console.log(chalk.redBright('✖ User not found.'));
         callback();
         return;
     }
     const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
     if (books.length === 0) {
-        console.log(`${user.name} does not have any borrowed books.`);
+        console.log(chalk.greenBright(`${user.name} does not have any borrowed books.`));
     } else {
-        console.log(`${user.name} is currently borrowing:`);
+        console.log(chalk.yellowBright(`${user.name} is currently borrowing:`));
         books.forEach(b => {
             let time = '';
             if (b.borrowedRecords) {

@@ -2,5 +2,10 @@
   {
     "id": 1,
     "name": "user 1"
+  },
+  {
+    "id": 2,
+    "name": "User 02",
+    "age": 5
   }
 ]
