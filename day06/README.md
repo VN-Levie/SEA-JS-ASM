@@ -19,7 +19,6 @@
 - **Dữ liệu lưu file JSON:** Đơn giản, dễ kiểm tra, không cần cài đặt database phức tạp, phù hợp cho ứng dụng nhỏ hoặc demo.
 - **Tách riêng logic quản lý sách/người dùng:** Sử dụng class Library để gom toàn bộ nghiệp vụ, giúp code rõ ràng, dễ mở rộng.
 - **Kiểm soát chặt chẽ dữ liệu:** Sử dụng TypeScript để định nghĩa kiểu dữ liệu, tránh lỗi khi thao tác với dữ liệu phức tạp.
-- **Lưu lịch sử mượn/trả:** Mỗi lần mượn/trả đều lưu lại thời điểm, giúp dễ kiểm tra, mở rộng các tính năng như thống kê, phạt trễ hạn.
 - **Giới hạn số sách mượn, kiểm tra tuổi:** Đảm bảo tuân thủ quy định thư viện thực tế, tăng tính thực tiễn.
 
 ## 4. Các package được sử dụng
