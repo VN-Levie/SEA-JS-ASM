@@ -312,15 +312,26 @@ function checkUserDebts(callback) {
         }
         else {
             console.log(chalk_1.default.yellowBright(`${user.name} is currently borrowing:`));
+            const table = new cli_table3_1.default({
+                head: [chalk_1.default.cyanBright('ID'), chalk_1.default.cyanBright('Title'), chalk_1.default.cyanBright('Author'), chalk_1.default.cyanBright('Borrowed At')],
+                colWidths: [5, 30, 20, 25]
+            });
             books.forEach(b => {
-                let time = '';
+                let borrowedAt = '';
                 if (b.borrowedRecords) {
                     const rec = [...b.borrowedRecords].reverse().find(r => r.userId === userId && !r.returnedAt);
                     if (rec)
-                        time = ` (borrowed at ${rec.borrowedAt})`;
+                        borrowedAt = rec.borrowedAt;
                 }
-                console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
+                table.push([
+                    b.id,
+                    b.title,
+                    b.author,
+                    borrowedAt
+                ]);
             });
+            console.log(table.toString());
+            console.log(chalk_1.default.greenBright('---------------------------------'));
         }
         callback();
     });

@@ -253,14 +253,25 @@ async function checkUserDebts(callback: () => void) {
         console.log(chalk.greenBright(`${user.name} does not have any borrowed books.`));
     } else {
         console.log(chalk.yellowBright(`${user.name} is currently borrowing:`));
+        const table = new Table({
+            head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Borrowed At')],
+            colWidths: [5, 30, 20, 25]
+        });
         books.forEach(b => {
-            let time = '';
+            let borrowedAt = '';
             if (b.borrowedRecords) {
                 const rec = [...b.borrowedRecords].reverse().find(r => r.userId === userId && !r.returnedAt);
-                if (rec) time = ` (borrowed at ${rec.borrowedAt})`;
+                if (rec) borrowedAt = rec.borrowedAt;
             }
-            console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
+            table.push([
+                b.id,
+                b.title,
+                b.author,
+                borrowedAt
+            ]);
         });
+        console.log(table.toString());
+        console.log(chalk.greenBright('---------------------------------'));
     }
     callback();
 }
