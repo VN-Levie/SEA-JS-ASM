@@ -1,6 +1,7 @@
 import { Library, User } from './Library';
 import { BookStatus, Book } from './Book';
 import * as readline from 'readline';
+import Table from 'cli-table3';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -29,17 +30,29 @@ function prompt(question: string): Promise<string> {
 
 async function listBooks(callback: () => void) {
     const books = lib.list();
+    const table = new Table({
+        head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+        colWidths: [5, 30, 20, 10, 8, 30]
+    });
     books.forEach(b => {
         const available = b.copies - b.borrowedCount;
         let userInfo = '';
         if (b.borrowedBy && b.borrowedBy.length > 0) {
-            userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+            userInfo = b.borrowedBy.map(uid => {
                 const user = lib.getUserById(uid);
                 return user ? user.name : `User#${uid}`;
-            }).join(', ') + ')';
+            }).join(', ');
         }
-        console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+        table.push([
+            b.id,
+            b.title,
+            b.author,
+            available,
+            b.copies,
+            userInfo
+        ]);
     });
+    console.log(table.toString());
     callback();
 }
 
@@ -68,8 +81,40 @@ async function borrowBook(callback: () => void) {
 }
 
 async function returnBook(callback: () => void) {
-    const rid = parseInt(await prompt('Enter book ID to return: '));
-    const returnerId = parseInt(await prompt('Enter your user ID: '));
+    const returnerIdInput = await prompt('Enter your user ID (or !q to quit): ');
+    if (returnerIdInput.trim() === '!q') {
+        callback();
+        return;
+    }
+    const returnerId = parseInt(returnerIdInput);
+    const user = lib.getUserById(returnerId);
+    if (!user) {
+        console.log('User not found.');
+        callback();
+        return;
+    }
+    // Liệt kê sách user đang mượn
+    const borrowedBooks = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
+    if (borrowedBooks.length === 0) {
+        console.log('You have not borrowed any books.');
+        callback();
+        return;
+    }
+    console.log('Books you are currently borrowing:');
+    borrowedBooks.forEach(b => {
+        let time = '';
+        if (b.borrowedRecords) {
+            const rec = [...b.borrowedRecords].reverse().find(r => r.userId === returnerId && !r.returnedAt);
+            if (rec) time = ` (borrowed at ${rec.borrowedAt})`;
+        }
+        console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
+    });
+    const ridInput = await prompt('Enter book ID to return (or !q to quit): ');
+    if (ridInput.trim() === '!q') {
+        callback();
+        return;
+    }
+    const rid = parseInt(ridInput);
     if (lib.returnBook(rid, returnerId)) {
         console.log('Book returned.');
     } else {
@@ -95,25 +140,46 @@ async function addUser(callback: () => void) {
 }
 
 async function searchBooks(callback: () => void) {
-    const keyword = (await prompt('Enter keyword to search (title/author): ')).toLowerCase();
-    const books = lib.list().filter(b =>
-        b.title.toLowerCase().includes(keyword) ||
-        b.author.toLowerCase().includes(keyword)
-    );
-    if (books.length === 0) {
-        console.log('No books found.');
-    } else {
-        books.forEach(b => {
-            const available = b.copies - b.borrowedCount;
-            let userInfo = '';
-            if (b.borrowedBy && b.borrowedBy.length > 0) {
-                userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
-                    const user = lib.getUserById(uid);
-                    return user ? user.name : `User#${uid}`;
-                }).join(', ') + ')';
-            }
-            console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
-        });
+    while (true) {
+        const keyword = (await prompt('Enter keyword to search (title/author, !q to quit): ')).toLowerCase();
+        if (keyword.trim() === '!q') {
+            break;
+        }
+        if(keyword.trim() === '') {
+            console.log('Keyword cannot be empty.');
+            continue;
+        }
+        const books = lib.list().filter(b =>
+            b.title.toLowerCase().includes(keyword) ||
+            b.author.toLowerCase().includes(keyword)
+        );
+        if (books.length === 0) {
+            console.log('No books found.');
+        } else {
+            const table = new Table({
+                head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                colWidths: [5, 30, 20, 10, 8, 30]
+            });
+            books.forEach(b => {
+                const available = b.copies - b.borrowedCount;
+                let userInfo = '';
+                if (b.borrowedBy && b.borrowedBy.length > 0) {
+                    userInfo = b.borrowedBy.map(uid => {
+                        const user = lib.getUserById(uid);
+                        return user ? user.name : `User#${uid}`;
+                    }).join(', ');
+                }
+                table.push([
+                    b.id,
+                    b.title,
+                    b.author,
+                    available,
+                    b.copies,
+                    userInfo
+                ]);
+            });
+            console.log(table.toString());
+        }
     }
     callback();
 }
@@ -123,10 +189,14 @@ async function listBorrowedBooks(callback: () => void) {
     if (books.length === 0) {
         console.log('No books are currently borrowed.');
     } else {
+        const table = new Table({
+            head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+            colWidths: [5, 30, 20, 10, 8, 30]
+        });
         books.forEach(b => {
             let userInfo = '';
             if (b.borrowedBy && b.borrowedBy.length > 0) {
-                userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                userInfo = b.borrowedBy.map(uid => {
                     const user = lib.getUserById(uid);                    
                     let time = '';
                     if (b.borrowedRecords) {
@@ -134,11 +204,19 @@ async function listBorrowedBooks(callback: () => void) {
                         if (rec) time = ` at ${rec.borrowedAt}`;
                     }
                     return user ? `${user.name}${time}` : `User#${uid}${time}`;
-                }).join(', ') + ')';
+                }).join(', ');
             }
             const available = b.copies - b.borrowedCount;
-            console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+            table.push([
+                b.id,
+                b.title,
+                b.author,
+                available,
+                b.copies,
+                userInfo
+            ]);
         });
+        console.log(table.toString());
     }
     callback();
 }
