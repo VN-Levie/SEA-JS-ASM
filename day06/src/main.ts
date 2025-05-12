@@ -1,4 +1,4 @@
-import { Library } from './Library';
+import { Library, User } from './Library';
 import { BookStatus, Book } from './Book';
 import * as readline from 'readline';
 
@@ -15,6 +15,11 @@ function showMenu() {
     console.log('2. Add book');
     console.log('3. Borrow book');
     console.log('4. Return book');
+    console.log('5. List users');
+    console.log('6. Add user');
+    console.log('7. Search books');
+    console.log('8. List borrowed books');
+    console.log('9. Check user debts');
     console.log('0. Exit');
 }
 
@@ -22,47 +27,172 @@ function prompt(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve));
 }
 
-async function main() {
-    let running = true;
-    while (running) {
-        showMenu();
-        const choice = await prompt('Choose an option: ');
-        switch (choice.trim()) {
-            case '1':
-                const books = lib.list();
-                books.forEach(b => {
-                    console.log(`#${b.id} - ${b.title} by ${b.author} [${BookStatus[b.status]}]`);
-                });
-                break;
-            case '2':
-                const id = parseInt(await prompt('Enter book ID: '));
-                const title = await prompt('Enter book title: ');
-                const author = await prompt('Enter author: ');
-                lib.addBook({ id, title, author, status: BookStatus.Available });
-                console.log('Book added.');
-                break;
-            case '3':
-                const bid = parseInt(await prompt('Enter book ID to borrow: '));
-                if (lib.borrowBook(bid)) {
-                    console.log('Book borrowed.');
-                } else {
-                    console.log('Cannot borrow this book.');
-                }
-                break;
-            case '4':
-                const rid = parseInt(await prompt('Enter book ID to return: '));
-                lib.returnBook(rid);
-                console.log('Book returned.');
-                break;
-            case '0':
-                running = false;
-                break;
-            default:
-                console.log('Invalid choice.');
+async function listBooks(callback: () => void) {
+    const books = lib.list();
+    books.forEach(b => {
+        const available = b.copies - b.borrowedCount;
+        let userInfo = '';
+        if (b.borrowedBy && b.borrowedBy.length > 0) {
+            userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                const user = lib.getUserById(uid);
+                return user ? user.name : `User#${uid}`;
+            }).join(', ') + ')';
         }
-    }
-
-    rl.close();
+        console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+    });
+    callback();
 }
 
-main();
+async function addBook(callback: () => void) {
+    const id = parseInt(await prompt('Enter book ID: '));
+    const title = await prompt('Enter book title: ');
+    const author = await prompt('Enter author: ');
+    const copies = parseInt(await prompt('Enter number of copies: '));
+    lib.addBook({ id, title, author, copies, borrowedCount: 0, borrowedBy: [] });
+    console.log('Book added.');
+    callback();
+}
+
+async function borrowBook(callback: () => void) {
+    const bid = parseInt(await prompt('Enter book ID to borrow: '));
+    const borrowerId = parseInt(await prompt('Enter your user ID: '));
+    if (lib.borrowBook(bid, borrowerId)) {
+        console.log('Book borrowed.');
+    } else {
+        console.log('Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.');
+    }
+    callback();
+}
+
+async function returnBook(callback: () => void) {
+    const rid = parseInt(await prompt('Enter book ID to return: '));
+    const returnerId = parseInt(await prompt('Enter your user ID: '));
+    if (lib.returnBook(rid, returnerId)) {
+        console.log('Book returned.');
+    } else {
+        console.log('Cannot return this book. Make sure you have borrowed it.');
+    }
+    callback();
+}
+
+async function listUsers(callback: () => void) {
+    const users = lib.listUsers();
+    users.forEach(u => {
+        console.log(`#${u.id} - ${u.name}`);
+    });
+    callback();
+}
+
+async function addUser(callback: () => void) {
+    const userId = parseInt(await prompt('Enter user ID: '));
+    const name = await prompt('Enter user name: ');
+    lib.addUser({ id: userId, name });
+    console.log('User added.');
+    callback();
+}
+
+async function searchBooks(callback: () => void) {
+    const keyword = (await prompt('Enter keyword to search (title/author): ')).toLowerCase();
+    const books = lib.list().filter(b =>
+        b.title.toLowerCase().includes(keyword) ||
+        b.author.toLowerCase().includes(keyword)
+    );
+    if (books.length === 0) {
+        console.log('No books found.');
+    } else {
+        books.forEach(b => {
+            const available = b.copies - b.borrowedCount;
+            let userInfo = '';
+            if (b.borrowedBy && b.borrowedBy.length > 0) {
+                userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                    const user = lib.getUserById(uid);
+                    return user ? user.name : `User#${uid}`;
+                }).join(', ') + ')';
+            }
+            console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+        });
+    }
+    callback();
+}
+
+async function listBorrowedBooks(callback: () => void) {
+    const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
+    if (books.length === 0) {
+        console.log('No books are currently borrowed.');
+    } else {
+        books.forEach(b => {
+            let userInfo = '';
+            if (b.borrowedBy && b.borrowedBy.length > 0) {
+                userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                    const user = lib.getUserById(uid);
+                    return user ? user.name : `User#${uid}`;
+                }).join(', ') + ')';
+            }
+            const available = b.copies - b.borrowedCount;
+            console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+        });
+    }
+    callback();
+}
+
+async function checkUserDebts(callback: () => void) {
+    const userId = parseInt(await prompt('Enter user ID to check: '));
+    const user = lib.getUserById(userId);
+    if (!user) {
+        console.log('User not found.');
+        callback();
+        return;
+    }
+    const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
+    if (books.length === 0) {
+        console.log(`${user.name} does not have any borrowed books.`);
+    } else {
+        console.log(`${user.name} is currently borrowing:`);
+        books.forEach(b => {
+            console.log(`#${b.id} - ${b.title} by ${b.author}`);
+        });
+    }
+    callback();
+}
+
+async function mainMenu() {
+    showMenu();
+    const choice = await prompt('Choose an option: ');
+    switch (choice.trim()) {
+        case '1':
+            await listBooks(mainMenu);
+            break;
+        case '2':
+            await addBook(mainMenu);
+            break;
+        case '3':
+            await borrowBook(mainMenu);
+            break;
+        case '4':
+            await returnBook(mainMenu);
+            break;
+        case '5':
+            await listUsers(mainMenu);
+            break;
+        case '6':
+            await addUser(mainMenu);
+            break;
+        case '7':
+            await searchBooks(mainMenu);
+            break;
+        case '8':
+            await listBorrowedBooks(mainMenu);
+            break;
+        case '9':
+            await checkUserDebts(mainMenu);
+            break;
+        case '0':
+            rl.close();
+            break;
+        default:
+            console.log('Invalid choice.');
+            mainMenu();
+    }
+}
+
+mainMenu();

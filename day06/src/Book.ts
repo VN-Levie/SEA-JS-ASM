@@ -8,5 +8,7 @@ export interface Book {
     readonly id: number;
     title: string;
     author: string;
-    status: BookStatus;
+    copies: number; 
+    borrowedCount: number; 
+    borrowedBy?: number[];
 }
