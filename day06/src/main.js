@@ -41,9 +41,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const Library_1 = require("./Library");
 const readline = __importStar(require("readline"));
+const cli_table3_1 = __importDefault(require("cli-table3"));
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -68,17 +72,29 @@ function prompt(question) {
 function listBooks(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const books = lib.list();
+        const table = new cli_table3_1.default({
+            head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+            colWidths: [5, 30, 20, 10, 8, 30]
+        });
         books.forEach(b => {
             const available = b.copies - b.borrowedCount;
             let userInfo = '';
             if (b.borrowedBy && b.borrowedBy.length > 0) {
-                userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                userInfo = b.borrowedBy.map(uid => {
                     const user = lib.getUserById(uid);
                     return user ? user.name : `User#${uid}`;
-                }).join(', ') + ')';
+                }).join(', ');
             }
-            console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+            table.push([
+                b.id,
+                b.title,
+                b.author,
+                available,
+                b.copies,
+                userInfo
+            ]);
         });
+        console.log(table.toString());
         callback();
     });
 }
@@ -191,17 +207,29 @@ function searchBooks(callback) {
                 console.log('No books found.');
             }
             else {
+                const table = new cli_table3_1.default({
+                    head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                    colWidths: [5, 30, 20, 10, 8, 30]
+                });
                 books.forEach(b => {
                     const available = b.copies - b.borrowedCount;
                     let userInfo = '';
                     if (b.borrowedBy && b.borrowedBy.length > 0) {
-                        userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                        userInfo = b.borrowedBy.map(uid => {
                             const user = lib.getUserById(uid);
                             return user ? user.name : `User#${uid}`;
-                        }).join(', ') + ')';
+                        }).join(', ');
                     }
-                    console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+                    table.push([
+                        b.id,
+                        b.title,
+                        b.author,
+                        available,
+                        b.copies,
+                        userInfo
+                    ]);
                 });
+                console.log(table.toString());
             }
         }
         callback();
@@ -214,10 +242,14 @@ function listBorrowedBooks(callback) {
             console.log('No books are currently borrowed.');
         }
         else {
+            const table = new cli_table3_1.default({
+                head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                colWidths: [5, 30, 20, 10, 8, 30]
+            });
             books.forEach(b => {
                 let userInfo = '';
                 if (b.borrowedBy && b.borrowedBy.length > 0) {
-                    userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
+                    userInfo = b.borrowedBy.map(uid => {
                         const user = lib.getUserById(uid);
                         let time = '';
                         if (b.borrowedRecords) {
@@ -226,11 +258,19 @@ function listBorrowedBooks(callback) {
                                 time = ` at ${rec.borrowedAt}`;
                         }
                         return user ? `${user.name}${time}` : `User#${uid}${time}`;
-                    }).join(', ') + ')';
+                    }).join(', ');
                 }
                 const available = b.copies - b.borrowedCount;
-                console.log(`#${b.id} - ${b.title} by ${b.author} [${available}/${b.copies} available]${userInfo}`);
+                table.push([
+                    b.id,
+                    b.title,
+                    b.author,
+                    available,
+                    b.copies,
+                    userInfo
+                ]);
             });
+            console.log(table.toString());
         }
         callback();
     });

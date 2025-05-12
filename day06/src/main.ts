@@ -125,16 +125,22 @@ async function returnBook(callback: () => void) {
 
 async function listUsers(callback: () => void) {
     const users = lib.listUsers();
-    users.forEach(u => {
-        console.log(`#${u.id} - ${u.name}`);
+    const table = new Table({
+        head: ['ID', 'Name', 'Age'],
+        colWidths: [5, 30, 8]
     });
+    users.forEach(u => {
+        table.push([u.id, u.name, u.age]);
+    });
+    console.log(table.toString());
     callback();
 }
 
 async function addUser(callback: () => void) {
     const userId = parseInt(await prompt('Enter user ID: '));
     const name = await prompt('Enter user name: ');
-    lib.addUser({ id: userId, name });
+    const age = parseInt(await prompt('Enter user age: '));
+    lib.addUser({ id: userId, name, age });
     console.log('User added.');
     callback();
 }

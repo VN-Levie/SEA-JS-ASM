@@ -9,6 +9,7 @@ const MAX_BORROW_PER_USER = 3;
 export interface User {
     readonly id: number;
     name: string;
+    age: number;
 }
 
 export class Library {
@@ -81,6 +82,9 @@ export class Library {
         const book = this.books.find(b => b.id === id);
         const user = this.getUserById(userId);
         if (!book || !user) return false;
+        if (book.minAge && user.age < book.minAge) {
+            return `User does not meet the minimum age requirement (${book.minAge}+).`;
+        }
         if (book.borrowedCount >= book.copies) return false;
         if (book.borrowedBy && book.borrowedBy.includes(userId)) return false;
         if (this.countUserBorrowedBooks(userId) >= MAX_BORROW_PER_USER) {

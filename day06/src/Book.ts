@@ -18,4 +18,5 @@ export interface Book {
     borrowedCount: number; 
     borrowedBy?: number[];
     borrowedRecords?: BorrowRecord[]; // lịch sử mượn/trả
+    minAge?: number; // giới hạn độ tuổi
 }
