@@ -48,23 +48,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Library_1 = require("./Library");
 const readline = __importStar(require("readline"));
 const cli_table3_1 = __importDefault(require("cli-table3"));
+const chalk_1 = __importDefault(require("chalk"));
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 const lib = new Library_1.Library();
 function showMenu() {
-    console.log('\n=== Library Menu ===');
-    console.log('1. List books');
-    console.log('2. Add book');
-    console.log('3. Borrow book');
-    console.log('4. Return book');
-    console.log('5. List users');
-    console.log('6. Add user');
-    console.log('7. Search books');
-    console.log('8. List borrowed books');
-    console.log('9. Check user debts');
-    console.log('0. Exit');
+    console.log(chalk_1.default.greenBright('\n==============================='));
+    console.log(chalk_1.default.bold.bgBlueBright('        📚 LIBRARY MENU 📚      '));
+    console.log(chalk_1.default.greenBright('==============================='));
+    console.log(chalk_1.default.yellowBright('1.') + ' List books');
+    console.log(chalk_1.default.yellowBright('2.') + ' Add book');
+    console.log(chalk_1.default.yellowBright('3.') + ' Borrow book');
+    console.log(chalk_1.default.yellowBright('4.') + ' Return book');
+    console.log(chalk_1.default.yellowBright('5.') + ' List users');
+    console.log(chalk_1.default.yellowBright('6.') + ' Add user');
+    console.log(chalk_1.default.yellowBright('7.') + ' Search books');
+    console.log(chalk_1.default.yellowBright('8.') + ' List borrowed books');
+    console.log(chalk_1.default.yellowBright('9.') + ' Check user debts');
+    console.log(chalk_1.default.yellowBright('0.') + ' Exit');
+    console.log(chalk_1.default.greenBright('==============================='));
 }
 function prompt(question) {
     return new Promise(resolve => rl.question(question, resolve));
@@ -73,7 +77,7 @@ function listBooks(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const books = lib.list();
         const table = new cli_table3_1.default({
-            head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+            head: [chalk_1.default.cyanBright('ID'), chalk_1.default.cyanBright('Title'), chalk_1.default.cyanBright('Author'), chalk_1.default.cyanBright('Available'), chalk_1.default.cyanBright('Total'), chalk_1.default.cyanBright('Borrowed By')],
             colWidths: [5, 30, 20, 10, 8, 30]
         });
         books.forEach(b => {
@@ -98,6 +102,7 @@ function listBooks(callback) {
             ]);
         });
         console.log(table.toString());
+        console.log(chalk_1.default.greenBright('---------------------------------'));
         callback();
     });
 }
@@ -108,7 +113,7 @@ function addBook(callback) {
         const author = yield prompt('Enter author: ');
         const copies = parseInt(yield prompt('Enter number of copies: '));
         lib.addBook({ id, title, author, copies, borrowedCount: 0, borrowedBy: [] });
-        console.log('Book added.');
+        console.log(chalk_1.default.greenBright('✔ Book added.'));
         callback();
     });
 }
@@ -118,13 +123,13 @@ function borrowBook(callback) {
         const borrowerId = parseInt(yield prompt('Enter your user ID: '));
         const result = lib.borrowBook(bid, borrowerId);
         if (result === true) {
-            console.log('Book borrowed.');
+            console.log(chalk_1.default.greenBright('✔ Book borrowed.'));
         }
         else if (typeof result === 'string') {
-            console.log('Cannot borrow this book:', result);
+            console.log(chalk_1.default.redBright('✖ Cannot borrow this book:'), chalk_1.default.yellow(result));
         }
         else {
-            console.log('Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.');
+            console.log(chalk_1.default.redBright('✖ Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.'));
         }
         callback();
     });
@@ -139,14 +144,13 @@ function returnBook(callback) {
         const returnerId = parseInt(returnerIdInput);
         const user = lib.getUserById(returnerId);
         if (!user) {
-            console.log('User not found.');
+            console.log(chalk_1.default.redBright('✖ User not found.'));
             callback();
             return;
         }
-        // Liệt kê sách user đang mượn
         const borrowedBooks = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
         if (borrowedBooks.length === 0) {
-            console.log('You have not borrowed any books.');
+            console.log(chalk_1.default.yellowBright('You have not borrowed any books.'));
             callback();
             return;
         }
@@ -167,10 +171,10 @@ function returnBook(callback) {
         }
         const rid = parseInt(ridInput);
         if (lib.returnBook(rid, returnerId)) {
-            console.log('Book returned.');
+            console.log(chalk_1.default.greenBright('✔ Book returned.'));
         }
         else {
-            console.log('Cannot return this book. Make sure you have borrowed it.');
+            console.log(chalk_1.default.redBright('✖ Cannot return this book. Make sure you have borrowed it.'));
         }
         callback();
     });
@@ -179,13 +183,14 @@ function listUsers(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const users = lib.listUsers();
         const table = new cli_table3_1.default({
-            head: ['ID', 'Name', 'Age'],
+            head: [chalk_1.default.cyanBright('ID'), chalk_1.default.cyanBright('Name'), chalk_1.default.cyanBright('Age')],
             colWidths: [5, 30, 8]
         });
         users.forEach(u => {
             table.push([u.id, u.name, u.age]);
         });
         console.log(table.toString());
+        console.log(chalk_1.default.greenBright('---------------------------------'));
         callback();
     });
 }
@@ -195,7 +200,7 @@ function addUser(callback) {
         const name = yield prompt('Enter user name: ');
         const age = parseInt(yield prompt('Enter user age: '));
         lib.addUser({ id: userId, name, age });
-        console.log('User added.');
+        console.log(chalk_1.default.greenBright('✔ User added.'));
         callback();
     });
 }
@@ -213,11 +218,11 @@ function searchBooks(callback) {
             const books = lib.list().filter(b => b.title.toLowerCase().includes(keyword) ||
                 b.author.toLowerCase().includes(keyword));
             if (books.length === 0) {
-                console.log('No books found.');
+                console.log(chalk_1.default.yellowBright('No books found.'));
             }
             else {
                 const table = new cli_table3_1.default({
-                    head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                    head: [chalk_1.default.cyanBright('ID'), chalk_1.default.cyanBright('Title'), chalk_1.default.cyanBright('Author'), chalk_1.default.cyanBright('Available'), chalk_1.default.cyanBright('Total'), chalk_1.default.cyanBright('Borrowed By')],
                     colWidths: [5, 30, 20, 10, 8, 30]
                 });
                 books.forEach(b => {
@@ -242,6 +247,7 @@ function searchBooks(callback) {
                     ]);
                 });
                 console.log(table.toString());
+                console.log(chalk_1.default.greenBright('---------------------------------'));
             }
         }
         callback();
@@ -251,11 +257,11 @@ function listBorrowedBooks(callback) {
     return __awaiter(this, void 0, void 0, function* () {
         const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
         if (books.length === 0) {
-            console.log('No books are currently borrowed.');
+            console.log(chalk_1.default.yellowBright('No books are currently borrowed.'));
         }
         else {
             const table = new cli_table3_1.default({
-                head: ['ID', 'Title', 'Author', 'Available', 'Total', 'Borrowed By'],
+                head: [chalk_1.default.cyanBright('ID'), chalk_1.default.cyanBright('Title'), chalk_1.default.cyanBright('Author'), chalk_1.default.cyanBright('Available'), chalk_1.default.cyanBright('Total'), chalk_1.default.cyanBright('Borrowed By')],
                 colWidths: [5, 30, 20, 10, 8, 30]
             });
             books.forEach(b => {
@@ -286,6 +292,7 @@ function listBorrowedBooks(callback) {
                 ]);
             });
             console.log(table.toString());
+            console.log(chalk_1.default.greenBright('---------------------------------'));
         }
         callback();
     });
@@ -295,16 +302,16 @@ function checkUserDebts(callback) {
         const userId = parseInt(yield prompt('Enter user ID to check: '));
         const user = lib.getUserById(userId);
         if (!user) {
-            console.log('User not found.');
+            console.log(chalk_1.default.redBright('✖ User not found.'));
             callback();
             return;
         }
         const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
         if (books.length === 0) {
-            console.log(`${user.name} does not have any borrowed books.`);
+            console.log(chalk_1.default.greenBright(`${user.name} does not have any borrowed books.`));
         }
         else {
-            console.log(`${user.name} is currently borrowing:`);
+            console.log(chalk_1.default.yellowBright(`${user.name} is currently borrowing:`));
             books.forEach(b => {
                 let time = '';
                 if (b.borrowedRecords) {

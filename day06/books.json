@@ -494,14 +494,13 @@
     "title": "White Fang",
     "author": "Jack London",
     "copies": 3,
-    "borrowedCount": 1,
-    "borrowedBy": [
-      1
-    ],
+    "borrowedCount": 0,
+    "borrowedBy": [],
     "borrowedRecords": [
       {
         "userId": 1,
-        "borrowedAt": "2025-05-12T08:38:06.489Z"
+        "borrowedAt": "2025-05-12T08:38:06.489Z",
+        "returnedAt": "2025-05-12T08:41:31.231Z"
       }
     ],
     "minAge": 10
