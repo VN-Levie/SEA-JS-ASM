@@ -56,8 +56,11 @@ async function addBook(callback: () => void) {
 async function borrowBook(callback: () => void) {
     const bid = parseInt(await prompt('Enter book ID to borrow: '));
     const borrowerId = parseInt(await prompt('Enter your user ID: '));
-    if (lib.borrowBook(bid, borrowerId)) {
+    const result = lib.borrowBook(bid, borrowerId);
+    if (result === true) {
         console.log('Book borrowed.');
+    } else if (typeof result === 'string') {
+        console.log('Cannot borrow this book:', result);
     } else {
         console.log('Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.');
     }
@@ -124,8 +127,13 @@ async function listBorrowedBooks(callback: () => void) {
             let userInfo = '';
             if (b.borrowedBy && b.borrowedBy.length > 0) {
                 userInfo = ' (Borrowed by: ' + b.borrowedBy.map(uid => {
-                    const user = lib.getUserById(uid);
-                    return user ? user.name : `User#${uid}`;
+                    const user = lib.getUserById(uid);                    
+                    let time = '';
+                    if (b.borrowedRecords) {
+                        const rec = [...b.borrowedRecords].reverse().find(r => r.userId === uid && !r.returnedAt);
+                        if (rec) time = ` at ${rec.borrowedAt}`;
+                    }
+                    return user ? `${user.name}${time}` : `User#${uid}${time}`;
                 }).join(', ') + ')';
             }
             const available = b.copies - b.borrowedCount;
@@ -149,7 +157,12 @@ async function checkUserDebts(callback: () => void) {
     } else {
         console.log(`${user.name} is currently borrowing:`);
         books.forEach(b => {
-            console.log(`#${b.id} - ${b.title} by ${b.author}`);
+            let time = '';
+            if (b.borrowedRecords) {
+                const rec = [...b.borrowedRecords].reverse().find(r => r.userId === userId && !r.returnedAt);
+                if (rec) time = ` (borrowed at ${rec.borrowedAt})`;
+            }
+            console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
         });
     }
     callback();

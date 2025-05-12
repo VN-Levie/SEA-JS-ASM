@@ -1,0 +1,452 @@
+[
+  {
+    "id": 1,
+    "title": "The Great Gatsby",
+    "author": "F. Scott Fitzgerald",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 2,
+    "title": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 3,
+    "title": "1984",
+    "author": "George Orwell",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 4,
+    "title": "Pride and Prejudice",
+    "author": "Jane Austen",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 5,
+    "title": "The Catcher in the Rye",
+    "author": "J.D. Salinger",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 6,
+    "title": "The Hobbit",
+    "author": "J.R.R. Tolkien",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 7,
+    "title": "Fahrenheit 451",
+    "author": "Ray Bradbury",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 8,
+    "title": "Jane Eyre",
+    "author": "Charlotte Brontë",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 9,
+    "title": "Animal Farm",
+    "author": "George Orwell",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 10,
+    "title": "Brave New World",
+    "author": "Aldous Huxley",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 11,
+    "title": "Moby Dick",
+    "author": "Herman Melville",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 12,
+    "title": "War and Peace",
+    "author": "Leo Tolstoy",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 13,
+    "title": "Crime and Punishment",
+    "author": "Fyodor Dostoevsky",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 14,
+    "title": "Wuthering Heights",
+    "author": "Emily Brontë",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 15,
+    "title": "The Odyssey",
+    "author": "Homer",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 16,
+    "title": "The Iliad",
+    "author": "Homer",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 17,
+    "title": "Great Expectations",
+    "author": "Charles Dickens",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 18,
+    "title": "Little Women",
+    "author": "Louisa May Alcott",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 19,
+    "title": "Dracula",
+    "author": "Bram Stoker",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 20,
+    "title": "Frankenstein",
+    "author": "Mary Shelley",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 21,
+    "title": "The Brothers Karamazov",
+    "author": "Fyodor Dostoevsky",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 22,
+    "title": "Don Quixote",
+    "author": "Miguel de Cervantes",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 23,
+    "title": "Les Misérables",
+    "author": "Victor Hugo",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 24,
+    "title": "A Tale of Two Cities",
+    "author": "Charles Dickens",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 25,
+    "title": "The Divine Comedy",
+    "author": "Dante Alighieri",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 26,
+    "title": "The Picture of Dorian Gray",
+    "author": "Oscar Wilde",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 27,
+    "title": "The Grapes of Wrath",
+    "author": "John Steinbeck",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 28,
+    "title": "The Sun Also Rises",
+    "author": "Ernest Hemingway",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 29,
+    "title": "The Old Man and the Sea",
+    "author": "Ernest Hemingway",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 30,
+    "title": "Lolita",
+    "author": "Vladimir Nabokov",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 31,
+    "title": "Catch-22",
+    "author": "Joseph Heller",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 32,
+    "title": "The Lord of the Rings",
+    "author": "J.R.R. Tolkien",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 33,
+    "title": "Slaughterhouse-Five",
+    "author": "Kurt Vonnegut",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 34,
+    "title": "The Sound and the Fury",
+    "author": "William Faulkner",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 35,
+    "title": "Gone with the Wind",
+    "author": "Margaret Mitchell",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 36,
+    "title": "Rebecca",
+    "author": "Daphne du Maurier",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 37,
+    "title": "The Stranger",
+    "author": "Albert Camus",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 38,
+    "title": "The Metamorphosis",
+    "author": "Franz Kafka",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 39,
+    "title": "The Trial",
+    "author": "Franz Kafka",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 40,
+    "title": "Ulysses",
+    "author": "James Joyce",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 41,
+    "title": "Madame Bovary",
+    "author": "Gustave Flaubert",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 42,
+    "title": "The Count of Monte Cristo",
+    "author": "Alexandre Dumas",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 43,
+    "title": "David Copperfield",
+    "author": "Charles Dickens",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 44,
+    "title": "Emma",
+    "author": "Jane Austen",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 45,
+    "title": "Persuasion",
+    "author": "Jane Austen",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 46,
+    "title": "Sense and Sensibility",
+    "author": "Jane Austen",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 47,
+    "title": "The Scarlet Letter",
+    "author": "Nathaniel Hawthorne",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 48,
+    "title": "A Passage to India",
+    "author": "E.M. Forster",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 49,
+    "title": "The Call of the Wild",
+    "author": "Jack London",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  },
+  {
+    "id": 50,
+    "title": "White Fang",
+    "author": "Jack London",
+    "copies": 3,
+    "borrowedCount": 0,
+    "borrowedBy": [],
+    "borrowedRecords": []
+  }
+]

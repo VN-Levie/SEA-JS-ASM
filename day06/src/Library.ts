@@ -1,9 +1,10 @@
-import { Book, BookStatus } from './Book';
+import { Book, BookStatus, BorrowRecord } from './Book';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const DATA_PATH = path.join(__dirname, '..', 'books.json');
 const USER_PATH = path.join(__dirname, '..', 'users.json');
+const MAX_BORROW_PER_USER = 3;
 
 export interface User {
     readonly id: number;
@@ -46,9 +47,9 @@ export class Library {
     }
 
     addBook(book: Book): void {
-        // Khởi tạo borrowedCount và borrowedBy nếu chưa có
         book.borrowedCount = 0;
         book.borrowedBy = [];
+        book.borrowedRecords = [];
         this.books.push(book);
         this.saveToFile();
     }
@@ -70,22 +71,31 @@ export class Library {
         return this.users.find(u => u.id === id);
     }
 
-    borrowBook(id: number, userId: number): boolean {
+    countUserBorrowedBooks(userId: number): number {
+        return this.books.reduce((count, b) =>
+            b.borrowedBy && b.borrowedBy.includes(userId) ? count + 1 : count, 0
+        );
+    }
+
+    borrowBook(id: number, userId: number): boolean | string {
         const book = this.books.find(b => b.id === id);
         const user = this.getUserById(userId);
-        if (
-            book &&
-            user &&
-            book.borrowedCount < book.copies &&
-            !(book.borrowedBy && book.borrowedBy.includes(userId))
-        ) {
-            book.borrowedCount += 1;
-            if (!book.borrowedBy) book.borrowedBy = [];
-            book.borrowedBy.push(userId);
-            this.saveToFile();
-            return true;
+        if (!book || !user) return false;
+        if (book.borrowedCount >= book.copies) return false;
+        if (book.borrowedBy && book.borrowedBy.includes(userId)) return false;
+        if (this.countUserBorrowedBooks(userId) >= MAX_BORROW_PER_USER) {
+            return `User has reached the maximum allowed borrowed books (${MAX_BORROW_PER_USER}).`;
         }
-        return false;
+        book.borrowedCount += 1;
+        if (!book.borrowedBy) book.borrowedBy = [];
+        book.borrowedBy.push(userId);
+        if (!book.borrowedRecords) book.borrowedRecords = [];
+        book.borrowedRecords.push({
+            userId,
+            borrowedAt: new Date().toISOString()
+        });
+        this.saveToFile();
+        return true;
     }
 
     returnBook(id: number, userId: number): boolean {
@@ -97,6 +107,15 @@ export class Library {
         ) {
             book.borrowedCount -= 1;
             book.borrowedBy = book.borrowedBy.filter(uid => uid !== userId);
+            if (book.borrowedRecords) {
+                for (let i = book.borrowedRecords.length - 1; i >= 0; i--) {
+                    const rec = book.borrowedRecords[i];
+                    if (rec.userId === userId && !rec.returnedAt) {
+                        rec.returnedAt = new Date().toISOString();
+                        break;
+                    }
+                }
+            }
             this.saveToFile();
             return true;
         }

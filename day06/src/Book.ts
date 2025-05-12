@@ -4,6 +4,12 @@ export enum BookStatus {
     Lost
 }
 
+export interface BorrowRecord {
+    userId: number;
+    borrowedAt: string; 
+    returnedAt?: string; 
+}
+
 export interface Book {
     readonly id: number;
     title: string;
@@ -11,4 +17,5 @@ export interface Book {
     copies: number; 
     borrowedCount: number; 
     borrowedBy?: number[];
+    borrowedRecords?: BorrowRecord[]; // lịch sử mượn/trả
 }
