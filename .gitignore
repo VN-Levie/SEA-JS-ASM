@@ -1,0 +1,74 @@
+# Node modules
+node_modules/
+*/node_modules/
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
+
+# Build output
+dist/
+build/
+out/
+
+# Dependency directories
+jspm_packages/
+
+# Coverage reports
+coverage/
+*.lcov
+
+# IDEs
+.vscode/
+.idea/
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Parcel-bundler cache
+.cache/
+
+# Typescript
+*.tsbuildinfo
+
+# Next.js (nếu dùng)
+.next/
+
+# Nuxt.js (nếu dùng)
+.nuxt/
+
+# SvelteKit (nếu dùng)
+.svelte-kit/
+
+# Remix (nếu dùng)
+.build/
+
+# PM2
+pids
+*.pid
+*.seed
+
+# Optional lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test
+test-results/
