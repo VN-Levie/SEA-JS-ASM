@@ -36,6 +36,10 @@ function prompt(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve));
 }
 
+function isQuitCommand(input: string): boolean {
+    return input.trim().toLowerCase() === '!q';
+}
+
 function displayBooks(booksToDisplay: Book[], title: string = "Available Books") {
     if (booksToDisplay.length === 0) {
         console.log(chalk.yellowBright(`No books to display for "${title}".`));
@@ -77,7 +81,7 @@ function listAllBooks(callback: () => void) {
 async function addBook(callback: () => void) {
     while (true) {
         const idStr = await prompt('Enter book ID (or !q to quit): ');
-        if (idStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(idStr)) return callback();
         if (!isPositiveInteger(idStr)) {
             console.log(chalk.redBright('Invalid book ID. Must be a positive integer.'));
             continue;
@@ -85,21 +89,21 @@ async function addBook(callback: () => void) {
         const id = parseInt(idStr);
 
         const title = await prompt('Enter book title (or !q to quit): ');
-        if (title.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(title)) return callback();
         if (!isNonEmptyString(title)) {
             console.log(chalk.redBright('Title cannot be empty.'));
             continue;
         }
 
         const author = await prompt('Enter author (or !q to quit): ');
-        if (author.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(author)) return callback();
         if (!isNonEmptyString(author)) {
             console.log(chalk.redBright('Author cannot be empty.'));
             continue;
         }    
         
         const copiesStr = await prompt('Enter number of copies (or !q to quit): ');
-        if (copiesStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(copiesStr)) return callback();
         if (!isPositiveInteger(copiesStr)) {
             console.log(chalk.redBright('Invalid number of copies. Must be a positive integer.'));
             continue;
@@ -108,7 +112,7 @@ async function addBook(callback: () => void) {
 
         let minAge: number | undefined = undefined;
         const minAgeStr = await prompt('Enter minimum age (e.g., 12, or leave blank/enter 0 for no restriction, or !q to quit): ');
-        if (minAgeStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(minAgeStr)) return callback();
         if (isNonEmptyString(minAgeStr) && minAgeStr.trim() !== '0') {
             if (!isPositiveInteger(minAgeStr)) {
                 console.log(chalk.redBright('Invalid minimum age. Must be a positive integer if specified.'));
@@ -134,7 +138,7 @@ async function addBook(callback: () => void) {
 async function borrowBook(callback: () => void) {
     while (true) {
         const bidStr = await prompt('Enter book ID to borrow (or !q to quit): ');
-        if (bidStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(bidStr)) return callback();
         if (!isPositiveInteger(bidStr)) {
             console.log(chalk.redBright('Invalid book ID.'));
             continue;
@@ -142,7 +146,7 @@ async function borrowBook(callback: () => void) {
         const bid = parseInt(bidStr);
 
         const borrowerIdStr = await prompt('Enter your user ID (or !q to quit): ');
-        if (borrowerIdStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(borrowerIdStr)) return callback();
         if (!isPositiveInteger(borrowerIdStr)) {
             console.log(chalk.redBright('Invalid user ID.'));
             continue;
@@ -164,7 +168,7 @@ async function borrowBook(callback: () => void) {
 async function returnBook(callback: () => void) {
     while (true) {
         const returnerIdInput = await prompt('Enter your user ID (or !q to quit): ');
-        if (returnerIdInput.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(returnerIdInput)) return callback();
         if (!isPositiveInteger(returnerIdInput)) {
             console.log(chalk.redBright('Invalid user ID.'));
             continue;
@@ -199,7 +203,7 @@ async function returnBook(callback: () => void) {
 
         while (true) {
             const ridInput = await prompt('Enter book ID to return (or !q to quit): ');
-            if (ridInput.trim().toLowerCase() === '!q') return callback();
+            if (isQuitCommand(ridInput)) return callback();
             if (!isPositiveInteger(ridInput)) {
                 console.log(chalk.redBright('Invalid book ID.'));
                 continue;
@@ -241,7 +245,7 @@ function showUsers(callback: () => void) {
 async function addUser(callback: () => void) {
     while (true) {
         const userIdStr = await prompt('Enter user ID (or !q to quit): ');
-        if (userIdStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(userIdStr)) return callback();
         if (!isPositiveInteger(userIdStr)) {
             console.log(chalk.redBright('Invalid user ID. Must be a positive integer.'));
             continue;
@@ -249,14 +253,14 @@ async function addUser(callback: () => void) {
         const userId = parseInt(userIdStr);
 
         const name = await prompt('Enter user name (or !q to quit): ');
-        if (name.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(name)) return callback();
         if (!isNonEmptyString(name)) {
             console.log(chalk.redBright('Name cannot be empty.'));
             continue;
         }
 
         const ageStr = await prompt('Enter user age (or !q to quit): ');
-        if (ageStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(ageStr)) return callback();
         if (!isPositiveInteger(ageStr)) {
             console.log(chalk.redBright('Invalid age. Must be a positive integer.'));
             continue;
@@ -278,7 +282,7 @@ async function addUser(callback: () => void) {
 async function searchBooks(callback: () => void) {
     const keyword = await prompt('Enter keyword to search (title/author, or !q to quit): ');
     const kw = keyword.trim().toLowerCase();
-    if (kw === '!q') {
+    if (isQuitCommand(kw)) {
         return callback();
     }
     if (kw === '') {
@@ -329,7 +333,7 @@ function showBorrowedBooks(callback: () => void) {
 async function checkUserDebts(callback: () => void) {
     while (true) {
         const userIdStr = await prompt('Enter user ID to check (or !q to quit): ');
-        if (userIdStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(userIdStr)) return callback();
         if (!isPositiveInteger(userIdStr)) {
             console.log(chalk.redBright('Invalid user ID.'));
             continue;
@@ -369,7 +373,7 @@ async function editBook(callback: () => void) {
     let bookToEdit: Book | undefined;
     while (true) {
         const idStr = await prompt('Enter book ID to edit, !s <keyword> to search, or !q to quit: ');
-        if (idStr.trim().toLowerCase() === '!q') return callback();
+        if (isQuitCommand(idStr)) return callback();
 
         if (idStr.trim().toLowerCase().startsWith('!s ')) {
             const keyword = idStr.trim().slice(3).toLowerCase();
