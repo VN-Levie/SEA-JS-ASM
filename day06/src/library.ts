@@ -1,11 +1,9 @@
 import { Book, BookStatus } from './book';
 import { User as UserClass } from './user';
-import { isPositiveInteger, isNonEmptyString, parseIntSafe, readJSON } from './utils';
-import * as fs from 'fs';
-import * as path from 'path';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe, readJSON, loadFromApi, saveToApi, saveToFile } from './utils';
+import { DATA_PATH, USER_PATH, BOOKS_API_URL, USERS_API_URL, BOOKS_SOURCE_TYPE, USERS_SOURCE_TYPE } from './config';
+import { DataSourceType } from './dataSourceType';
 
-const DATA_PATH = path.join(__dirname, '..', 'books.json');
-const USER_PATH = path.join(__dirname, '..', 'users.json');
 const MAX_BORROW_PER_USER = 3;
 
 export class Library {
@@ -13,35 +11,53 @@ export class Library {
     private users: UserClass[] = [];
 
     public constructor() {
-        this.loadBookData();
-        this.loadUserData();
+        this.loadBookData(BOOKS_SOURCE_TYPE, BOOKS_API_URL);
+        this.loadUserData(USERS_SOURCE_TYPE, USERS_API_URL);
     }
 
-    private loadBookData(): void {
-        const arr = readJSON(DATA_PATH);
-        if (arr && Array.isArray(arr)) {
-            this.books = arr.filter((b: any) => isPositiveInteger(String(b.id)))
-                .map((b: any) => ({
-                    id: b.id,
-                    title: typeof b.title === 'string' ? b.title : '',
-                    author: typeof b.author === 'string' ? b.author : '',
-                    copies: isPositiveInteger(String(b.copies)) ? b.copies : 1,
-                    borrowedCount: typeof b.borrowedCount === 'number' && b.borrowedCount >= 0 ? b.borrowedCount : 0,
-                    borrowedBy: Array.isArray(b.borrowedBy) ? b.borrowedBy.filter((uid: any) => isPositiveInteger(String(uid))) : [],
-                    borrowedRecords: Array.isArray(b.borrowedRecords) ? b.borrowedRecords : [],
-                    minAge: isPositiveInteger(String(b.minAge)) ? b.minAge : 3
-                }));
-        } else {
+    public async loadBookData(sourceType: DataSourceType = DataSourceType.JSON, apiUrl?: string): Promise<void> {
+        try {
+            let arr: any;
+            if (sourceType === DataSourceType.RESTFUL && apiUrl) {
+                arr = await loadFromApi(apiUrl);
+            } else {
+                arr = readJSON(DATA_PATH);
+            }
+            if (arr && Array.isArray(arr)) {
+                this.books = arr.filter((b: any) => isPositiveInteger(String(b.id)))
+                    .map((b: any) => ({
+                        id: b.id,
+                        title: typeof b.title === 'string' ? b.title : '',
+                        author: typeof b.author === 'string' ? b.author : '',
+                        copies: isPositiveInteger(String(b.copies)) ? b.copies : 1,
+                        borrowedCount: typeof b.borrowedCount === 'number' && b.borrowedCount >= 0 ? b.borrowedCount : 0,
+                        borrowedBy: Array.isArray(b.borrowedBy) ? b.borrowedBy.filter((uid: any) => isPositiveInteger(String(uid))) : [],
+                        borrowedRecords: Array.isArray(b.borrowedRecords) ? b.borrowedRecords : [],
+                        minAge: isPositiveInteger(String(b.minAge)) ? b.minAge : 3
+                    }));
+            } else {
+                this.books = [];
+            }
+        } catch (err) {
             this.books = [];
         }
     }
 
-    private saveToFile(): void {
-        fs.writeFileSync(DATA_PATH, JSON.stringify(this.books, null, 2), 'utf-8');
+    private async saveBooks(): Promise<void> {
+        if (BOOKS_SOURCE_TYPE === DataSourceType.RESTFUL && BOOKS_API_URL) {
+            await saveToApi(BOOKS_API_URL, this.books);
+        } else {
+            await saveToFile(DATA_PATH, this.books);
+        }
     }
 
-    private loadUserData(): void {
-        const arr = readJSON(USER_PATH);
+    public async loadUserData(sourceType: DataSourceType = DataSourceType.JSON, apiUrl?: string): Promise<void> {
+        let arr: any;
+        if (sourceType === DataSourceType.RESTFUL && apiUrl) {
+            arr = await loadFromApi(apiUrl);
+        } else {
+            arr = readJSON(USER_PATH);
+        }
         if (arr && Array.isArray(arr)) {
             this.users = arr.filter((u: any) => isPositiveInteger(String(u.id)))
                 .map((u: any) => new UserClass(
@@ -54,8 +70,12 @@ export class Library {
         }
     }
 
-    private saveUsersToFile(): void {
-        fs.writeFileSync(USER_PATH, JSON.stringify(this.users.map(user => user.toJSON()), null, 2), 'utf-8');
+    private async saveUsers(): Promise<void> {
+        if (USERS_SOURCE_TYPE === DataSourceType.RESTFUL && USERS_API_URL) {
+            await saveToApi(USERS_API_URL, this.users.map(user => user.toJSON()));
+        } else {
+            await saveToFile(USER_PATH, this.users.map(user => user.toJSON()));
+        }
     }
 
     public addBook(book: Book): void {
@@ -90,7 +110,7 @@ export class Library {
     public updateBook(id: number, data: Partial<Book>): void {
         const idx = this.books.findIndex(b => b.id === id);
         if (idx !== -1) {
-            this.books[idx] = { ...this.books[idx], ...data };          
+            this.books[idx] = { ...this.books[idx], ...data };
         }
     }
 
@@ -146,8 +166,8 @@ export class Library {
         return false;
     }
 
-    public saveAll(): void {
-        this.saveToFile();
-        this.saveUsersToFile();
+    public async saveAll(): Promise<void> {
+        await this.saveBooks();
+        await this.saveUsers();
     }
 }

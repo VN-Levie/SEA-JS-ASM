@@ -529,7 +529,7 @@ async function mainMenu() {
         case '0':
             const save = (await prompt('Do you want to save changes before exiting? (y/n): ')).toLowerCase();
             if (save === 'y' || save === 'yes') {
-                lib.saveAll();
+                await lib.saveAll();
                 console.log(chalk.greenBright('✔ Changes saved.'));
             } else {
                 console.log(chalk.yellowBright('Exiting without saving changes.'));
