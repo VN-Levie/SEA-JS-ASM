@@ -35,7 +35,7 @@ function prompt(question: string): Promise<string> {
 }
 
 function showBooks(callback: () => void) {
-    const books = lib.list();
+    const books = lib.listBooks();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
         colWidths: [5, 30, 20, 10, 8, 30]
@@ -74,7 +74,7 @@ async function addBook(callback: () => void) {
             continue;
         }
         const id = parseInt(idStr);
-        if (lib.list().some(b => b.id === id)) {
+        if (lib.listBooks().some(b => b.id === id)) {
             console.log(chalk.redBright('Book ID already exists. Please enter a unique ID.'));
             continue;
         }
@@ -90,7 +90,7 @@ async function addBook(callback: () => void) {
             console.log(chalk.redBright('Author cannot be empty.'));
             continue;
         }    
-        const existingBook = lib.list().find(
+        const existingBook = lib.listBooks().find(
             b => b.title.trim().toLowerCase() === title.trim().toLowerCase() &&
                  b.author.trim().toLowerCase() === author.trim().toLowerCase()
         );
@@ -163,7 +163,7 @@ async function returnBook(callback: () => void) {
             console.log(chalk.redBright('✖ User not found.'));
             continue;
         }
-        const borrowedBooks = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
+        const borrowedBooks = lib.listBooks().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
         if (borrowedBooks.length === 0) {
             console.log(chalk.yellowBright('You have not borrowed any books.'));
             return callback();
@@ -266,7 +266,7 @@ async function searchBooks(callback: () => void) {
                 console.log('Keyword cannot be empty.');
                 return searchLoop();
             }
-            const books = lib.list().filter(b =>
+            const books = lib.listBooks().filter(b =>
                 b.title.toLowerCase().includes(kw) ||
                 b.author.toLowerCase().includes(kw)
             );
@@ -307,7 +307,7 @@ async function searchBooks(callback: () => void) {
 }
 
 function showBorrowedBooks(callback: () => void) {
-    const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
+    const books = lib.listBooks().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
     if (books.length === 0) {
         console.log(chalk.yellowBright('No books are currently borrowed.'));
     } else {
@@ -360,7 +360,7 @@ async function checkUserDebts(callback: () => void) {
             console.log(chalk.redBright('✖ User not found.'));
             continue;
         }
-        const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
+        const books = lib.listBooks().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
         if (books.length === 0) {
             console.log(chalk.greenBright(`${user.name} does not have any borrowed books.`));
         } else {
@@ -402,7 +402,7 @@ async function editBook(callback: () => void) {
                 console.log(chalk.redBright('Keyword cannot be empty.'));
                 continue;
             }
-            const books = lib.list().filter(b =>
+            const books = lib.listBooks().filter(b =>
                 b.title.toLowerCase().includes(keyword) ||
                 b.author.toLowerCase().includes(keyword)
             );
@@ -433,7 +433,7 @@ async function editBook(callback: () => void) {
             id = parseInt(idStr);
         }
 
-        const book = lib.list().find(b => b.id === id);
+        const book = lib.listBooks().find(b => b.id === id);
         if (!book) {
             console.log(chalk.redBright('Book not found.'));
             continue;

@@ -85,7 +85,7 @@ export class Library {
         this.books.push(book);
     }
 
-    public list(): Book[] {
+    public listBooks(): Book[] {
         return this.books;
     }
 
