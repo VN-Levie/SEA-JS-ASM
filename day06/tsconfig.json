@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",         // nơi lưu file .js sau khi biên dịch
+    "rootDir": "./src",   
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
