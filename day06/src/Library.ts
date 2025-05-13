@@ -16,7 +16,7 @@ export class Library {
     private books: Book[] = [];
     private users: User[] = [];
 
-    constructor() {
+    public constructor() {
         this.loadFromFile();
         this.loadUsersFromFile();
     }
@@ -47,43 +47,43 @@ export class Library {
         fs.writeFileSync(USER_PATH, JSON.stringify(this.users, null, 2), 'utf-8');
     }
 
-    addBook(book: Book): void {
+    public addBook(book: Book): void {
         book.borrowedCount = 0;
         book.borrowedBy = [];
         book.borrowedRecords = [];
         this.books.push(book);
     }
 
-    list(): Book[] {
+    public list(): Book[] {
         return this.books;
     }
 
-    addUser(user: User): void {
+    public addUser(user: User): void {
         this.users.push(user);
     }
 
-    listUsers(): User[] {
+    public listUsers(): User[] {
         return this.users;
     }
 
-    getUserById(id: number): User | undefined {
+    public getUserById(id: number): User | undefined {
         return this.users.find(u => u.id === id);
     }
 
-    countUserBorrowedBooks(userId: number): number {
+    public countUserBorrowedBooks(userId: number): number {
         return this.books.reduce((count, b) =>
             b.borrowedBy && b.borrowedBy.includes(userId) ? count + 1 : count, 0
         );
     }
 
-    updateBook(id: number, data: Partial<Book>): void {
+    public updateBook(id: number, data: Partial<Book>): void {
         const idx = this.books.findIndex(b => b.id === id);
         if (idx !== -1) {
             this.books[idx] = { ...this.books[idx], ...data };          
         }
     }
 
-    borrowBook(id: number, userId: number): boolean | string {
+    public borrowBook(id: number, userId: number): boolean | string {
         const book = this.books.find(b => b.id === id);
         const user = this.getUserById(userId);
         if (!book || !user) return false;
@@ -109,7 +109,7 @@ export class Library {
         return true;
     }
 
-    returnBook(id: number, userId: number): boolean {
+    public returnBook(id: number, userId: number): boolean {
         const book = this.books.find(b => b.id === id);
         if (
             book &&
