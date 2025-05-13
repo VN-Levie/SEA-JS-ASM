@@ -307,7 +307,14 @@ async function mainMenu() {
         case '9':
             await checkUserDebts(mainMenu);
             break;
-        case '0':
+        case '0':          
+            const save = (await prompt('Do you want to save changes before exiting? (y/n): ')).toLowerCase();
+            if (save === 'y' || save === 'yes') {
+                lib.saveAll();
+                console.log(chalk.greenBright('✔ Changes saved.'));
+            } else {
+                console.log(chalk.yellowBright('Exiting without saving changes.'));
+            }
             rl.close();
             break;
         default:

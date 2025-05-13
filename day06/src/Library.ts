@@ -52,7 +52,6 @@ export class Library {
         book.borrowedBy = [];
         book.borrowedRecords = [];
         this.books.push(book);
-        this.saveToFile();
     }
 
     list(): Book[] {
@@ -61,7 +60,6 @@ export class Library {
 
     addUser(user: User): void {
         this.users.push(user);
-        this.saveUsersToFile();
     }
 
     listUsers(): User[] {
@@ -81,8 +79,7 @@ export class Library {
     updateBook(id: number, data: Partial<Book>): void {
         const idx = this.books.findIndex(b => b.id === id);
         if (idx !== -1) {
-            this.books[idx] = { ...this.books[idx], ...data };
-            this.saveToFile();
+            this.books[idx] = { ...this.books[idx], ...data };          
         }
     }
 
@@ -136,5 +133,10 @@ export class Library {
             return true;
         }
         return false;
+    }
+
+    public saveAll(): void {
+        this.saveToFile();
+        this.saveUsersToFile();
     }
 }
