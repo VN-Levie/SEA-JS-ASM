@@ -1,4 +1,4 @@
-import { Book, BookStatus, BorrowRecord } from './Book';
+import { Book, BookStatus } from './book'; // ✅ đúng theo tên file thật
 import * as fs from 'fs';
 import * as path from 'path';
 
