@@ -4,9 +4,16 @@
     "title": "The Great Gatsby",
     "author": "F. Scott Fitzgerald",
     "copies": 3,
-    "borrowedCount": 0,
-    "borrowedBy": [],
-    "borrowedRecords": [],
+    "borrowedCount": 1,
+    "borrowedBy": [
+      1
+    ],
+    "borrowedRecords": [
+      {
+        "userId": 1,
+        "borrowedAt": "2025-05-13T04:45:22.590Z"
+      }
+    ],
     "minAge": 16
   },
   {
