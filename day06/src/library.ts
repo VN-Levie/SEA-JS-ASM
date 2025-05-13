@@ -1,6 +1,6 @@
 import { Book, BookStatus } from './book';
 import { User as UserClass } from './user';
-import { isPositiveInteger, isNonEmptyString, parseIntSafe } from './utils';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe, readJSON } from './utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -13,14 +13,13 @@ export class Library {
     private users: UserClass[] = [];
 
     public constructor() {
-        this.loadFromFile();
-        this.loadUsersFromFile();
+        this.loadBookData();
+        this.loadUserData();
     }
 
-    private loadFromFile(): void {
-        if (fs.existsSync(DATA_PATH)) {
-            const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-            const arr = JSON.parse(raw);
+    private loadBookData(): void {
+        const arr = readJSON(DATA_PATH);
+        if (arr && Array.isArray(arr)) {
             this.books = arr.filter((b: any) => isPositiveInteger(String(b.id)))
                 .map((b: any) => ({
                     id: b.id,
@@ -41,10 +40,9 @@ export class Library {
         fs.writeFileSync(DATA_PATH, JSON.stringify(this.books, null, 2), 'utf-8');
     }
 
-    private loadUsersFromFile(): void {
-        if (fs.existsSync(USER_PATH)) {
-            const raw = fs.readFileSync(USER_PATH, 'utf-8');
-            const arr = JSON.parse(raw);
+    private loadUserData(): void {
+        const arr = readJSON(USER_PATH);
+        if (arr && Array.isArray(arr)) {
             this.users = arr.filter((u: any) => isPositiveInteger(String(u.id)))
                 .map((u: any) => new UserClass(
                     u.id,
@@ -86,7 +84,7 @@ export class Library {
     public countUserBorrowedBooks(userId: number): number {
         const user = this.getUserById(userId);
         if (!user) return 0;
-        return user.borrowedBooksCount(this.books);
+        return user.countBorrowedBooks(this.books);
     }
 
     public updateBook(id: number, data: Partial<Book>): void {

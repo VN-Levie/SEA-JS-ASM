@@ -11,12 +11,12 @@ export class User {
         this.age = age;
     }
 
-    public borrowedBooksCount(books: Book[]): number {
+    public countBorrowedBooks(books: Book[]): number {
         return books.reduce((count, b) => b.borrowedBy && b.borrowedBy.includes(this.id) ? count + 1 : count, 0);
     }
 
     public canBorrow(books: Book[], maxBorrow: number): boolean {
-        return this.borrowedBooksCount(books) < maxBorrow;
+        return this.countBorrowedBooks(books) < maxBorrow;
     }
 
     public toJSON() {
