@@ -167,16 +167,26 @@ async function returnBook(callback: () => void) {
         if (borrowedBooks.length === 0) {
             console.log(chalk.yellowBright('You have not borrowed any books.'));
             return callback();
-        }
-        console.log('Books you are currently borrowing:');
+        }        
+        const table = new Table({
+            head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Borrowed At')],
+            colWidths: [5, 30, 20, 25]
+        });
         borrowedBooks.forEach(b => {
-            let time = '';
+            let borrowedAt = '';
             if (b.borrowedRecords) {
                 const rec = [...b.borrowedRecords].reverse().find(r => r.userId === returnerId && !r.returnedAt);
-                if (rec) time = ` (borrowed at ${rec.borrowedAt})`;
+                if (rec) borrowedAt = rec.borrowedAt;
             }
-            console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
+            table.push([
+                b.id,
+                b.title,
+                b.author,
+                borrowedAt
+            ]);
         });
+        console.log(chalk.yellowBright('Books you are currently borrowing:'));
+        console.log(table.toString());
         while (true) {
             const ridInput = await prompt('Enter book ID to return (or !q to quit): ');
             if (ridInput.trim() === '!q') return callback();
@@ -401,11 +411,11 @@ async function editBook(callback: () => void) {
                 continue;
             }
             const table = new Table({
-                head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available')],
-                colWidths: [5, 30, 20, 10]
+                head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
+                colWidths: [5, 30, 20, 10, 8, 30]
             });
             books.forEach(b => {
-                table.push([b.id, b.title, b.author]);
+                table.push([b.id, b.title, b.author, b.copies - b.borrowedCount, b.copies, b.borrowedBy ? b.borrowedBy.join(', ') : '']);
             });
             console.log(table.toString());
             const pickIdStr = await prompt('Enter book ID from the above list to edit (or !q to quit): ');
