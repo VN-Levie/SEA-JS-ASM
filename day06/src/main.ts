@@ -1,5 +1,4 @@
 import { Library, User } from './library';
-import { BookStatus, Book } from './book';
 import * as readline from 'readline';
 import Table from 'cli-table3';
 import chalk from 'chalk';
