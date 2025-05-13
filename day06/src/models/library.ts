@@ -167,12 +167,12 @@ export class Library {
         return [...this.users];
     }
 
-    public getUserById(id: number): User | undefined {
+    public findUserById(id: number): User | undefined {
         return this.users.find(u => u.id === id);
     }
 
     public countUserBorrowedBooks(userId: number): number {
-        const user = this.getUserById(userId);
+        const user = this.findUserById(userId);
         if (!user) return 0;
         return user.countBorrowedBooks(this.books);
     }
@@ -191,7 +191,7 @@ export class Library {
 
     public borrowBook(bookId: number, userId: number): string | true {
         const book = this.findBookById(bookId);
-        const user = this.getUserById(userId);
+        const user = this.findUserById(userId);
 
         if (!book) return "Book not found.";
         if (!user) return "User not found.";
@@ -213,7 +213,7 @@ export class Library {
 
     public returnBook(bookId: number, userId: number): string | true {
         const book = this.findBookById(bookId);
-        const user = this.getUserById(userId);
+        const user = this.findUserById(userId);
 
         if (!book) return "Book not found.";
         if (!user) return "User not found.";

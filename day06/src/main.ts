@@ -49,7 +49,7 @@ function displayBooks(booksToDisplay: Book[], title: string = "Available Books")
         let userInfo = '';
         if (b.borrowedBy && b.borrowedBy.length > 0) {
             userInfo = b.borrowedBy.map(uid => {
-                const user = lib.getUserById(uid);
+                const user = lib.findUserById(uid);
                 return user ? user.name : `User#${uid}`;
             }).join(', ');
         }
@@ -170,7 +170,7 @@ async function returnBook(callback: () => void) {
             continue;
         }
         const returnerId = parseInt(returnerIdInput);
-        const user = lib.getUserById(returnerId);
+        const user = lib.findUserById(returnerId);
         if (!user) {
             console.log(chalk.redBright('✖ User not found.'));
             continue;
@@ -308,7 +308,7 @@ function showBorrowedBooks(callback: () => void) {
                  borrowedDetails = b.borrowedRecords
                     .filter(rec => !rec.returnedAt)
                     .map(rec => {
-                        const user = lib.getUserById(rec.userId);
+                        const user = lib.findUserById(rec.userId);
                         const userName = user ? user.name : `User#${rec.userId}`;
                         const borrowedDate = new Date(rec.borrowedAt).toLocaleDateString();
                         return `${userName} (on ${borrowedDate})`;
@@ -335,7 +335,7 @@ async function checkUserDebts(callback: () => void) {
             continue;
         }
         const userId = parseInt(userIdStr);
-        const user = lib.getUserById(userId);
+        const user = lib.findUserById(userId);
         if (!user) {
             console.log(chalk.redBright('✖ User not found.'));
             continue;
