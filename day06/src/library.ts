@@ -1,4 +1,6 @@
 import { Book, BookStatus } from './book';
+import { User as UserClass } from './user';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe } from './utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -6,15 +8,9 @@ const DATA_PATH = path.join(__dirname, '..', 'books.json');
 const USER_PATH = path.join(__dirname, '..', 'users.json');
 const MAX_BORROW_PER_USER = 3;
 
-export interface User {
-    readonly id: number;
-    name: string;
-    age: number;
-}
-
 export class Library {
     private books: Book[] = [];
-    private users: User[] = [];
+    private users: UserClass[] = [];
 
     public constructor() {
         this.loadFromFile();
@@ -37,14 +33,14 @@ export class Library {
     private loadUsersFromFile(): void {
         if (fs.existsSync(USER_PATH)) {
             const raw = fs.readFileSync(USER_PATH, 'utf-8');
-            this.users = JSON.parse(raw);
+            this.users = JSON.parse(raw).map((userData: any) => new UserClass(userData.id, userData.name, userData.age));
         } else {
             this.users = [];
         }
     }
 
     private saveUsersToFile(): void {
-        fs.writeFileSync(USER_PATH, JSON.stringify(this.users, null, 2), 'utf-8');
+        fs.writeFileSync(USER_PATH, JSON.stringify(this.users.map(user => user.toJSON()), null, 2), 'utf-8');
     }
 
     public addBook(book: Book): void {
@@ -58,22 +54,22 @@ export class Library {
         return this.books;
     }
 
-    public addUser(user: User): void {
+    public addUser(user: UserClass): void {
         this.users.push(user);
     }
 
-    public listUsers(): User[] {
+    public listUsers(): UserClass[] {
         return this.users;
     }
 
-    public getUserById(id: number): User | undefined {
+    public getUserById(id: number): UserClass | undefined {
         return this.users.find(u => u.id === id);
     }
 
     public countUserBorrowedBooks(userId: number): number {
-        return this.books.reduce((count, b) =>
-            b.borrowedBy && b.borrowedBy.includes(userId) ? count + 1 : count, 0
-        );
+        const user = this.getUserById(userId);
+        if (!user) return 0;
+        return user.borrowedBooksCount(this.books);
     }
 
     public updateBook(id: number, data: Partial<Book>): void {

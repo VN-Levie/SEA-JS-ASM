@@ -1,7 +1,9 @@
-import { Library, User } from './library';
+import { Library } from './library';
 import * as readline from 'readline';
 import Table from 'cli-table3';
 import chalk from 'chalk';
+import { User as UserClass } from './user';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe } from './utils';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -31,7 +33,7 @@ function prompt(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve));
 }
 
-function listBooks(callback: () => void) {
+function showBooks(callback: () => void) {
     const books = lib.list();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
@@ -140,7 +142,7 @@ function returnBook(callback: () => void) {
     });
 }
 
-function listUsers(callback: () => void) {
+function showUsers(callback: () => void) {
     const users = lib.listUsers();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Name'), chalk.cyanBright('Age')],
@@ -156,11 +158,24 @@ function listUsers(callback: () => void) {
 
 function addUser(callback: () => void) {
     prompt('Enter user ID: ').then(userIdStr => {
-        const userId = parseInt(userIdStr);
+        if (!isPositiveInteger(userIdStr)) {
+            console.log(chalk.redBright('Invalid user ID.'));
+            return addUser(callback);
+        }
+        const userId = parseIntSafe(userIdStr);
         prompt('Enter user name: ').then(name => {
+            if (!isNonEmptyString(name)) {
+                console.log(chalk.redBright('Name cannot be empty.'));
+                return addUser(callback);
+            }
             prompt('Enter user age: ').then(ageStr => {
-                const age = parseInt(ageStr);
-                lib.addUser({ id: userId, name, age });
+                if (!isPositiveInteger(ageStr)) {
+                    console.log(chalk.redBright('Invalid age.'));
+                    return addUser(callback);
+                }
+                const age = parseIntSafe(ageStr);
+                const user = new UserClass(userId, name, age);
+                lib.addUser(user);
                 console.log(chalk.greenBright('✔ User added.'));
                 callback();
             });
@@ -220,7 +235,7 @@ function searchBooks(callback: () => void) {
     searchLoop();
 }
 
-function listBorrowedBooks(callback: () => void) {
+function showBorrowedBooks(callback: () => void) {
     const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
     if (books.length === 0) {
         console.log(chalk.yellowBright('No books are currently borrowed.'));
@@ -303,7 +318,7 @@ async function mainMenu() {
     const choice = await prompt('Choose an option: ');
     switch (choice.trim()) {
         case '1':
-            listBooks(mainMenu);
+            showBooks(mainMenu);
             break;
         case '2':
             addBook(mainMenu);
@@ -315,7 +330,7 @@ async function mainMenu() {
             returnBook(mainMenu);
             break;
         case '5':
-            listUsers(mainMenu);
+            showUsers(mainMenu);
             break;
         case '6':
             addUser(mainMenu);
@@ -324,7 +339,7 @@ async function mainMenu() {
             searchBooks(mainMenu);
             break;
         case '8':
-            listBorrowedBooks(mainMenu);
+            showBorrowedBooks(mainMenu);
             break;
         case '9':
             checkUserDebts(mainMenu);
