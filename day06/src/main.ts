@@ -25,6 +25,7 @@ function showMenu() {
     console.log(chalk.yellowBright('7.') + ' Search books');
     console.log(chalk.yellowBright('8.') + ' List borrowed books');
     console.log(chalk.yellowBright('9.') + ' Check user debts');
+    console.log(chalk.yellowBright('10.') + ' Edit book');
     console.log(chalk.yellowBright('0.') + ' Exit');
     console.log(chalk.greenBright('==============================='));
 }
@@ -33,7 +34,7 @@ function prompt(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve));
 }
 
-async function showBooks(callback: () => void) {
+function showBooks(callback: () => void) {
     const books = lib.list();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
@@ -87,6 +88,22 @@ async function addBook(callback: () => void) {
         if (author.trim() === '!q') return callback();
         if (!isNonEmptyString(author)) {
             console.log(chalk.redBright('Author cannot be empty.'));
+            continue;
+        }    
+        const existingBook = lib.list().find(
+            b => b.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+                 b.author.trim().toLowerCase() === author.trim().toLowerCase()
+        );
+        if (existingBook) {
+            console.log(
+                chalk.redBright('A book with the same title and author already exists!'),
+                chalk.yellow(`(ID: ${existingBook.id})`)
+            );
+            console.log(
+                chalk.yellowBright(
+                    `Type !q to return to menu and use "Edit book" with ID: ${existingBook.id} to update this book.`
+                )
+            );
             continue;
         }
         const copiesStr = await prompt('Enter number of copies (or !q to quit): ');
@@ -180,7 +197,7 @@ async function returnBook(callback: () => void) {
     }
 }
 
-async function showUsers(callback: () => void) {
+function showUsers(callback: () => void) {
     const users = lib.listUsers();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Name'), chalk.cyanBright('Age')],
@@ -279,7 +296,7 @@ async function searchBooks(callback: () => void) {
     searchLoop();
 }
 
-async function showBorrowedBooks(callback: () => void) {
+function showBorrowedBooks(callback: () => void) {
     const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
     if (books.length === 0) {
         console.log(chalk.yellowBright('No books are currently borrowed.'));
@@ -362,6 +379,109 @@ async function checkUserDebts(callback: () => void) {
     }
 }
 
+async function editBook(callback: () => void) {
+    while (true) {
+        const idStr = await prompt('Enter book ID to edit or !s <keyword> to search (or !q to quit): ');
+        if (idStr.trim() === '!q') return callback();
+
+        let id: number | undefined;
+
+        if (idStr.trim().startsWith('!s ')) {
+            const keyword = idStr.trim().slice(3).toLowerCase();
+            if (!keyword) {
+                console.log(chalk.redBright('Keyword cannot be empty.'));
+                continue;
+            }
+            const books = lib.list().filter(b =>
+                b.title.toLowerCase().includes(keyword) ||
+                b.author.toLowerCase().includes(keyword)
+            );
+            if (books.length === 0) {
+                console.log(chalk.yellowBright('No books found.'));
+                continue;
+            }
+            const table = new Table({
+                head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available')],
+                colWidths: [5, 30, 20, 10]
+            });
+            books.forEach(b => {
+                table.push([b.id, b.title, b.author]);
+            });
+            console.log(table.toString());
+            const pickIdStr = await prompt('Enter book ID from the above list to edit (or !q to quit): ');
+            if (pickIdStr.trim() === '!q') return callback();
+            if (!isPositiveInteger(pickIdStr)) {
+                console.log(chalk.redBright('Invalid book ID.'));
+                continue;
+            }
+            id = parseInt(pickIdStr);
+        } else {
+            if (!isPositiveInteger(idStr)) {
+                console.log(chalk.redBright('Invalid book ID.'));
+                continue;
+            }
+            id = parseInt(idStr);
+        }
+
+        const book = lib.list().find(b => b.id === id);
+        if (!book) {
+            console.log(chalk.redBright('Book not found.'));
+            continue;
+        }
+        console.log(chalk.yellowBright(`Editing book: #${book.id} - ${book.title} by ${book.author}`));
+      
+        const newTitle = await prompt(`Enter new title [${book.title}] (or ! to keep): `);
+       
+        const newAuthor = await prompt(`Enter new author [${book.author}] (or ! to keep): `);
+
+        const newCopiesStr = await prompt(`Enter new number of copies [${book.copies}] (or ! to keep): `);
+     
+        const newMinAgeStr = await prompt(`Enter new min age [${book.minAge ?? ''}] (or ! to keep): `);
+
+        const updateData: any = {};
+        if (newTitle.trim() !== '!') {
+            if (!isNonEmptyString(newTitle)) {
+                console.log(chalk.redBright('Title cannot be empty.'));
+                continue;
+            }
+            updateData.title = newTitle;
+        }
+        if (newAuthor.trim() !== '!') {
+            if (!isNonEmptyString(newAuthor)) {
+                console.log(chalk.redBright('Author cannot be empty.'));
+                continue;
+            }
+            updateData.author = newAuthor;
+        }
+        if (newCopiesStr.trim() !== '!') {
+            if (!isPositiveInteger(newCopiesStr)) {
+                console.log(chalk.redBright('Invalid number of copies.'));
+                continue;
+            }
+            const newCopies = parseInt(newCopiesStr);
+            if (newCopies < (book.borrowedCount || 0)) {
+                console.log(chalk.redBright('Copies cannot be less than currently borrowed count.'));
+                continue;
+            }
+            updateData.copies = newCopies;
+        }
+        if (newMinAgeStr.trim() !== '!') {
+            if (!isPositiveInteger(newMinAgeStr)) {
+                console.log(chalk.redBright('Invalid min age.'));
+                continue;
+            }
+            updateData.minAge = parseInt(newMinAgeStr);
+        }
+        if (Object.keys(updateData).length === 0) {
+            console.log(chalk.yellowBright('No changes made.'));
+        } else {
+            lib.updateBook(id, updateData);
+            console.log(chalk.greenBright('✔ Book updated.'));
+        }
+        return callback();
+    }
+}
+
 async function mainMenu() {
     showMenu();
     const choice = await prompt('Choose an option: ');
@@ -392,6 +512,9 @@ async function mainMenu() {
             break;
         case '9':
             checkUserDebts(mainMenu);
+            break;
+        case '10':
+            editBook(mainMenu);
             break;
         case '0':
             const save = (await prompt('Do you want to save changes before exiting? (y/n): ')).toLowerCase();
