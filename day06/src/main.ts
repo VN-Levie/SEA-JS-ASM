@@ -279,21 +279,28 @@ async function addUser(callback: () => void) {
     }
 }
 
-async function searchBooks(callback: () => void) {
-    const keyword = await prompt('Enter keyword to search (title/author, or !q to quit): ');
+function bookFilter(keyword: string): Book[] {
     const kw = keyword.trim().toLowerCase();
-    if (isQuitCommand(kw)) {
-        return callback();
-    }
     if (kw === '') {
         console.log(chalk.yellowBright('Keyword cannot be empty.'));
-        return searchBooks(callback);
+        return [];
     }
-    const books = lib.listBooks().filter(b =>
+    return lib.listBooks().filter(b =>
         b.title.toLowerCase().includes(kw) ||
         b.author.toLowerCase().includes(kw)
     );
-    displayBooks(books, `Search Results for "${keyword}"`);
+}
+
+async function searchBooks(callback: () => void) {
+    const keyword = await prompt('Enter keyword to search (title/author, or !q to quit): ');
+    if (isQuitCommand(keyword)) return callback();
+
+    const books = bookFilter(keyword);
+    if (books.length === 0) {
+        console.log(chalk.yellowBright(`No books found for keyword "${keyword}".`));
+    } else {
+        displayBooks(books, `Search Results for "${keyword}"`);
+    }
     searchBooks(callback);
 }
 
@@ -376,15 +383,8 @@ async function editBook(callback: () => void) {
         if (isQuitCommand(idStr)) return callback();
 
         if (idStr.trim().toLowerCase().startsWith('!s ')) {
-            const keyword = idStr.trim().slice(3).toLowerCase();
-            if (!keyword) {
-                console.log(chalk.redBright('Search keyword cannot be empty.'));
-                continue;
-            }
-            const foundBooks = lib.listBooks().filter(b =>
-                b.title.toLowerCase().includes(keyword) ||
-                b.author.toLowerCase().includes(keyword)
-            );
+            const keyword = idStr.trim().slice(3);
+            const foundBooks = bookFilter(keyword);
             if (foundBooks.length === 0) {
                 console.log(chalk.yellowBright('No books found matching your search.'));
                 continue;
@@ -406,10 +406,9 @@ async function editBook(callback: () => void) {
         }
 
         if (!bookToEdit) {
-            console.log(chalk.redBright('Book not found with the given ID.'));
-            continue;
+            console.log(chalk.redBright('✖ No book selected to edit.'));
+            return callback();
         }
-        
         console.log(chalk.yellowBright(`Editing book: #${bookToEdit.id} - ${bookToEdit.title} by ${bookToEdit.author}`));
         const updateData: { title?: string; author?: string; copies?: number; minAge?: number | null } = {};
 
