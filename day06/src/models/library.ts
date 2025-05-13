@@ -1,8 +1,14 @@
 import { Book, BookStatus } from './book';
 import { User as UserClass } from './user';
-import { isPositiveInteger, isNonEmptyString, parseIntSafe, readJSON, loadFromApi, saveToApi, saveToFile } from './utils';
-import { DATA_PATH, USER_PATH, BOOKS_API_URL, USERS_API_URL, BOOKS_SOURCE_TYPE, USERS_SOURCE_TYPE } from './config';
-import { DataSourceType } from './dataSourceType';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe, readJSON, loadFromApi, saveToApi, saveToFile } from '../commons/utils';
+import { DATA_PATH, USER_PATH, BOOKS_API_URL, USERS_API_URL, BOOKS_SOURCE_TYPE, USERS_SOURCE_TYPE } from '../commons/config';
+import { DataSourceType } from '../commons/dataSourceType';
+
+// Thêm enum mới để xác định loại dữ liệu
+export enum AppDataType {
+    BOOK = 'BOOK',
+    USER = 'USER'
+}
 
 const MAX_BORROW_PER_USER = 3;
 
@@ -10,19 +16,52 @@ export class Library {
     private books: Book[] = [];
     private users: UserClass[] = [];
 
-    public constructor() {
-        this.loadBookData(BOOKS_SOURCE_TYPE, BOOKS_API_URL);
-        this.loadUserData(USERS_SOURCE_TYPE, USERS_API_URL);
+    public constructor() {       
+        this.loadAppData();
     }
 
-    public async loadBookData(sourceType: DataSourceType = DataSourceType.JSON, apiUrl?: string): Promise<void> {
+    private isRestfulSource(type: AppDataType): boolean {
+        if (type === AppDataType.BOOK) {
+            return BOOKS_SOURCE_TYPE === DataSourceType.RESTFUL && !!BOOKS_API_URL;
+        }
+        if (type === AppDataType.USER) {
+            return USERS_SOURCE_TYPE === DataSourceType.RESTFUL && !!USERS_API_URL;
+        }
+        return false;
+    }
+
+    public async loadAppData(): Promise<void> {
+        await this.loadBookData();
+        await this.loadUserData();
+    }
+ 
+    private async loadData(type: AppDataType): Promise<any> {
+        let arr: any;
+        switch (type) {
+            case AppDataType.BOOK:
+                if (this.isRestfulSource(AppDataType.BOOK)) {
+                    arr = await loadFromApi(BOOKS_API_URL);
+                } else {                    
+                    arr = readJSON(DATA_PATH);
+                }
+                break;
+            case AppDataType.USER:
+                if (this.isRestfulSource(AppDataType.USER)) {
+                    arr = await loadFromApi(USERS_API_URL);
+                } else {
+                    arr = readJSON(USER_PATH);
+                }
+                break;
+            default:
+                arr = undefined;
+        }
+        return arr;
+    }
+
+    
+    public async loadBookData(): Promise<void> {
         try {
-            let arr: any;
-            if (sourceType === DataSourceType.RESTFUL && apiUrl) {
-                arr = await loadFromApi(apiUrl);
-            } else {
-                arr = readJSON(DATA_PATH);
-            }
+            const arr = await this.loadData(AppDataType.BOOK);
             if (arr && Array.isArray(arr)) {
                 this.books = arr.filter((b: any) => isPositiveInteger(String(b.id)))
                     .map((b: any) => ({
@@ -43,35 +82,35 @@ export class Library {
         }
     }
 
+    
+    public async loadUserData(): Promise<void> {
+        try {
+            const arr = await this.loadData(AppDataType.USER);
+            if (arr && Array.isArray(arr)) {
+                this.users = arr.filter((u: any) => isPositiveInteger(String(u.id)))
+                    .map((u: any) => new UserClass(
+                        u.id,
+                        typeof u.name === 'string' ? u.name : 'Unknown',
+                        isPositiveInteger(String(u.age)) ? u.age : 18
+                    ));
+            } else {
+                this.users = [];
+            }
+        } catch (err) {
+            this.users = [];
+        }
+    }
+
     private async saveBooks(): Promise<void> {
-        if (BOOKS_SOURCE_TYPE === DataSourceType.RESTFUL && BOOKS_API_URL) {
+        if (this.isRestfulSource(AppDataType.BOOK)) {
             await saveToApi(BOOKS_API_URL, this.books);
         } else {
             await saveToFile(DATA_PATH, this.books);
         }
     }
 
-    public async loadUserData(sourceType: DataSourceType = DataSourceType.JSON, apiUrl?: string): Promise<void> {
-        let arr: any;
-        if (sourceType === DataSourceType.RESTFUL && apiUrl) {
-            arr = await loadFromApi(apiUrl);
-        } else {
-            arr = readJSON(USER_PATH);
-        }
-        if (arr && Array.isArray(arr)) {
-            this.users = arr.filter((u: any) => isPositiveInteger(String(u.id)))
-                .map((u: any) => new UserClass(
-                    u.id,
-                    typeof u.name === 'string' ? u.name : 'Unknown',
-                    isPositiveInteger(String(u.age)) ? u.age : 18
-                ));
-        } else {
-            this.users = [];
-        }
-    }
-
     private async saveUsers(): Promise<void> {
-        if (USERS_SOURCE_TYPE === DataSourceType.RESTFUL && USERS_API_URL) {
+        if (this.isRestfulSource(AppDataType.USER)) {
             await saveToApi(USERS_API_URL, this.users.map(user => user.toJSON()));
         } else {
             await saveToFile(USER_PATH, this.users.map(user => user.toJSON()));

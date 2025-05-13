@@ -1,9 +1,9 @@
-import { Library } from './library';
+import { Library } from './models/library';
 import * as readline from 'readline';
 import Table from 'cli-table3';
 import chalk from 'chalk';
-import { User as UserClass } from './user';
-import { isPositiveInteger, isNonEmptyString, parseIntSafe } from './utils';
+import { User as UserClass } from './models/user';
+import { isPositiveInteger, isNonEmptyString, parseIntSafe } from './commons/utils';
 
 const rl = readline.createInterface({
     input: process.stdin,
