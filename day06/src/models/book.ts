@@ -10,8 +10,9 @@ export class Book {
     public borrowedBy: number[];
     public borrowedRecords: BorrowRecord[];
     public minAge?: number;
+    public genre?: string;
 
-    constructor(id: number, title: string, author: string, copies: number, minAge?: number, borrowedCount: number = 0, borrowedBy: number[] = [], borrowedRecords: BorrowRecord[] = []) {
+    constructor(id: number, title: string, author: string, copies: number, minAge?: number, borrowedCount: number = 0, borrowedBy: number[] = [], borrowedRecords: BorrowRecord[] = [], genre?: string) {
         if (!isPositiveInteger(String(id))) {
             throw new Error('Book ID must be a positive integer.');
         }
@@ -33,6 +34,9 @@ export class Book {
         if (copies < borrowedCount) {
             throw new Error('Copies cannot be less than borrowed count.');
         }
+        if (genre !== undefined && !isNonEmptyString(genre)) {
+            throw new Error('Genre must be a non-empty string if specified.');
+        }
 
         this.id = id;
         this.title = title;
@@ -42,6 +46,7 @@ export class Book {
         this.borrowedCount = borrowedCount;
         this.borrowedBy = [...borrowedBy];
         this.borrowedRecords = [...borrowedRecords].map(r => ({...r}));
+        this.genre = genre;
     }
 
     public getAvailableCopies(): number {
@@ -101,7 +106,7 @@ export class Book {
         }
     }
     
-    public updateDetails(data: { title?: string; author?: string; copies?: number; minAge?: number | null }): string | true {
+    public updateDetails(data: { title?: string; author?: string; copies?: number; minAge?: number | null; genre?: string | null }): string | true {
         if (data.title !== undefined) {
             if (!isNonEmptyString(data.title)) return "Title cannot be empty.";
             this.title = data.title;
@@ -123,6 +128,14 @@ export class Book {
                 this.minAge = data.minAge;
             }
         }
+        if (data.genre !== undefined) {
+            if (data.genre === null) {
+                this.genre = undefined;
+            } else {
+                if (!isNonEmptyString(data.genre)) return "Genre must be a non-empty string.";
+                this.genre = data.genre;
+            }
+        }
         return true;
     }
 
@@ -136,6 +149,7 @@ export class Book {
             borrowedBy: [...this.borrowedBy],
             borrowedRecords: [...this.borrowedRecords].map(r => ({...r})),
             minAge: this.minAge,
+            genre: this.genre,
         };
     }
 }

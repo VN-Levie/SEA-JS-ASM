@@ -9,4 +9,5 @@ export interface BookData {
     borrowedBy?: number[];
     borrowedRecords?: BorrowRecord[];
     minAge?: number;
+    genre?: string;
 }

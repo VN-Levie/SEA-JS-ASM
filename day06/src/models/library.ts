@@ -12,6 +12,7 @@ const MAX_BORROW_PER_USER = 3;
 export class Library {
     private books: Book[] = [];
     private users: User[] = [];
+    private genres: Set<string> = new Set(); // Added to store unique genres
 
     public constructor() {
     }
@@ -58,20 +59,25 @@ export class Library {
     public async loadBookData(): Promise<void> {
         const rawBooksData = await this.loadData(AppDataType.BOOK);
         this.books = [];
+        this.genres.clear(); // Clear genres before loading
         for (const b of rawBooksData) {
             try {
                 if (b && typeof b.id === 'number') {
-                     const book = new Book(
+                    const book = new Book(
                         b.id,
                         typeof b.title === 'string' ? b.title : 'Unknown Title',
                         typeof b.author === 'string' ? b.author : 'Unknown Author',
                         typeof b.copies === 'number' && b.copies >= 0 ? b.copies : 1,
                         typeof b.minAge === 'number' && b.minAge > 0 ? b.minAge : undefined,
-                        typeof b.borrowedCount === 'number' && b.borrowedCount >=0 ? b.borrowedCount : 0,
+                        typeof b.borrowedCount === 'number' && b.borrowedCount >= 0 ? b.borrowedCount : 0,
                         Array.isArray(b.borrowedBy) ? b.borrowedBy.filter((uid: any) => typeof uid === 'number') : [],
-                        Array.isArray(b.borrowedRecords) ? b.borrowedRecords.filter((rec: any) => rec && typeof rec.userId === 'number' && typeof rec.borrowedAt === 'string') : []
+                        Array.isArray(b.borrowedRecords) ? b.borrowedRecords.filter((rec: any) => rec && typeof rec.userId === 'number' && typeof rec.borrowedAt === 'string') : [],
+                        typeof b.genre === 'string' ? b.genre : undefined
                     );
                     this.books.push(book);
+                    if (book.genre) {
+                        this.genres.add(book.genre); // Add genre to the set
+                    }
                 }
             } catch (error) {
                 console.error(`Error loading book with data ${JSON.stringify(b)}:`, error instanceof Error ? error.message : String(error));
@@ -79,7 +85,10 @@ export class Library {
         }
     }
 
-    
+    public getGenres(): string[] {
+        return Array.from(this.genres); // Return genres as an array
+    }
+
     public async loadUserData(): Promise<void> {
         const rawUsersData = await this.loadData(AppDataType.USER);
         this.users = [];

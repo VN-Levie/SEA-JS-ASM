@@ -14,7 +14,8 @@
         "borrowedAt": "2025-05-13T04:45:22.590Z"
       }
     ],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Classic Literary Fiction"
   },
   {
     "id": 2,
@@ -24,7 +25,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Classic Coming-of-age"
   },
   {
     "id": 3,
@@ -34,7 +36,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Dystopian Fiction"
   },
   {
     "id": 4,
@@ -44,7 +47,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Classic Romance"
   },
   {
     "id": 5,
@@ -54,7 +58,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Coming-of-age Fiction"
   },
   {
     "id": 6,
@@ -64,7 +69,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 10
+    "minAge": 10,
+    "genre": "Fantasy"
   },
   {
     "id": 7,
@@ -74,7 +80,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Dystopian Fiction"
   },
   {
     "id": 8,
@@ -84,7 +91,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Gothic Romance"
   },
   {
     "id": 9,
@@ -94,7 +102,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 12
+    "minAge": 12,
+    "genre": "Political Satire"
   },
   {
     "id": 10,
@@ -104,7 +113,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Dystopian Fiction"
   },
   {
     "id": 11,
@@ -114,7 +124,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Adventure Fiction"
   },
   {
     "id": 12,
@@ -124,7 +135,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Historical Fiction"
   },
   {
     "id": 13,
@@ -134,7 +146,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Psychological Fiction"
   },
   {
     "id": 14,
@@ -144,7 +157,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Gothic Romance"
   },
   {
     "id": 15,
@@ -154,7 +168,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 12
+    "minAge": 12,
+    "genre": "Epic Poetry"
   },
   {
     "id": 16,
@@ -164,7 +179,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 12
+    "minAge": 12,
+    "genre": "Epic Poetry"
   },
   {
     "id": 17,
@@ -174,7 +190,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Coming-of-age Fiction"
   },
   {
     "id": 18,
@@ -184,7 +201,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 10
+    "minAge": 10,
+    "genre": "Coming-of-age Fiction"
   },
   {
     "id": 19,
@@ -194,7 +212,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Gothic Horror"
   },
   {
     "id": 20,
@@ -204,7 +223,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Gothic Science Fiction"
   },
   {
     "id": 21,
@@ -214,7 +234,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Philosophical Fiction"
   },
   {
     "id": 22,
@@ -224,7 +245,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Satire"
   },
   {
     "id": 23,
@@ -234,7 +256,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Historical Fiction"
   },
   {
     "id": 24,
@@ -244,7 +267,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Historical Fiction"
   },
   {
     "id": 25,
@@ -254,7 +278,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Epic Poetry"
   },
   {
     "id": 26,
@@ -264,7 +289,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Philosophical Fiction"
   },
   {
     "id": 27,
@@ -274,7 +300,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Historical Fiction"
   },
   {
     "id": 28,
@@ -284,7 +311,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Modernist Fiction"
   },
   {
     "id": 29,
@@ -294,7 +322,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 12
+    "minAge": 12,
+    "genre": "Literary Fiction"
   },
   {
     "id": 30,
@@ -304,7 +333,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 18
+    "minAge": 18,
+    "genre": "Literary Fiction"
   },
   {
     "id": 31,
@@ -314,7 +344,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Satire"
   },
   {
     "id": 32,
@@ -324,7 +355,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 12
+    "minAge": 12,
+    "genre": "Fantasy"
   },
   {
     "id": 33,
@@ -334,7 +366,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Science Fiction Satire"
   },
   {
     "id": 34,
@@ -344,7 +377,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Modernist Fiction"
   },
   {
     "id": 35,
@@ -354,7 +388,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Historical Romance"
   },
   {
     "id": 36,
@@ -364,7 +399,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Gothic Mystery"
   },
   {
     "id": 37,
@@ -374,7 +410,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Philosophical Fiction"
   },
   {
     "id": 38,
@@ -384,7 +421,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Absurdist Fiction"
   },
   {
     "id": 39,
@@ -394,7 +432,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Absurdist Fiction"
   },
   {
     "id": 40,
@@ -404,7 +443,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 18
+    "minAge": 18,
+    "genre": "Modernist Fiction"
   },
   {
     "id": 41,
@@ -414,7 +454,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 16
+    "minAge": 16,
+    "genre": "Realist Fiction"
   },
   {
     "id": 42,
@@ -424,7 +465,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Adventure Fiction"
   },
   {
     "id": 43,
@@ -434,7 +476,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Coming-of-age Fiction"
   },
   {
     "id": 44,
@@ -444,7 +487,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Classic Romance"
   },
   {
     "id": 45,
@@ -454,7 +498,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Classic Romance"
   },
   {
     "id": 46,
@@ -464,7 +509,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 14
+    "minAge": 14,
+    "genre": "Classic Romance"
   },
   {
     "id": 47,
@@ -474,7 +520,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Historical Fiction"
   },
   {
     "id": 48,
@@ -484,7 +531,8 @@
     "borrowedCount": 0,
     "borrowedBy": [],
     "borrowedRecords": [],
-    "minAge": 15
+    "minAge": 15,
+    "genre": "Historical Fiction"
   },
   {
     "id": 49,
@@ -501,7 +549,8 @@
         "borrowedAt": "2025-05-12T10:22:19.035Z"
       }
     ],
-    "minAge": 10
+    "minAge": 10,
+    "genre": "Adventure Fiction"
   },
   {
     "id": 50,
@@ -517,6 +566,7 @@
         "returnedAt": "2025-05-12T08:41:31.231Z"
       }
     ],
-    "minAge": 10
+    "minAge": 10,
+    "genre": "Adventure Fiction"
   }
 ]
