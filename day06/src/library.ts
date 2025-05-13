@@ -20,7 +20,18 @@ export class Library {
     private loadFromFile(): void {
         if (fs.existsSync(DATA_PATH)) {
             const raw = fs.readFileSync(DATA_PATH, 'utf-8');
-            this.books = JSON.parse(raw);
+            const arr = JSON.parse(raw);
+            this.books = arr.filter((b: any) => isPositiveInteger(String(b.id)))
+                .map((b: any) => ({
+                    id: b.id,
+                    title: typeof b.title === 'string' ? b.title : '',
+                    author: typeof b.author === 'string' ? b.author : '',
+                    copies: isPositiveInteger(String(b.copies)) ? b.copies : 1,
+                    borrowedCount: typeof b.borrowedCount === 'number' && b.borrowedCount >= 0 ? b.borrowedCount : 0,
+                    borrowedBy: Array.isArray(b.borrowedBy) ? b.borrowedBy.filter((uid: any) => isPositiveInteger(String(uid))) : [],
+                    borrowedRecords: Array.isArray(b.borrowedRecords) ? b.borrowedRecords : [],
+                    minAge: isPositiveInteger(String(b.minAge)) ? b.minAge : 3
+                }));
         } else {
             this.books = [];
         }
@@ -33,7 +44,13 @@ export class Library {
     private loadUsersFromFile(): void {
         if (fs.existsSync(USER_PATH)) {
             const raw = fs.readFileSync(USER_PATH, 'utf-8');
-            this.users = JSON.parse(raw).map((userData: any) => new UserClass(userData.id, userData.name, userData.age));
+            const arr = JSON.parse(raw);
+            this.users = arr.filter((u: any) => isPositiveInteger(String(u.id)))
+                .map((u: any) => new UserClass(
+                    u.id,
+                    typeof u.name === 'string' ? u.name : 'Unknown',
+                    isPositiveInteger(String(u.age)) ? u.age : 18
+                ));
         } else {
             this.users = [];
         }

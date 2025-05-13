@@ -33,7 +33,7 @@ function prompt(question: string): Promise<string> {
     return new Promise(resolve => rl.question(question, resolve));
 }
 
-function showBooks(callback: () => void) {
+async function showBooks(callback: () => void) {
     const books = lib.list();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Title'), chalk.cyanBright('Author'), chalk.cyanBright('Available'), chalk.cyanBright('Total'), chalk.cyanBright('Borrowed By')],
@@ -64,58 +64,92 @@ function showBooks(callback: () => void) {
     callback();
 }
 
-function addBook(callback: () => void) {
-    prompt('Enter book ID: ').then(idStr => {
+async function addBook(callback: () => void) {
+    while (true) {
+        const idStr = await prompt('Enter book ID (or !q to quit): ');
+        if (idStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(idStr)) {
+            console.log(chalk.redBright('Invalid book ID.'));
+            continue;
+        }
         const id = parseInt(idStr);
-        prompt('Enter book title: ').then(title => {
-            prompt('Enter author: ').then(author => {
-                prompt('Enter number of copies: ').then(copiesStr => {
-                    const copies = parseInt(copiesStr);
-                    lib.addBook({ id, title, author, copies, borrowedCount: 0, borrowedBy: [] });
-                    console.log(chalk.greenBright('✔ Book added.'));
-                    callback();
-                });
-            });
-        });
-    });
+        if (lib.list().some(b => b.id === id)) {
+            console.log(chalk.redBright('Book ID already exists. Please enter a unique ID.'));
+            continue;
+        }
+        const title = await prompt('Enter book title (or !q to quit): ');
+        if (title.trim() === '!q') return callback();
+        if (!isNonEmptyString(title)) {
+            console.log(chalk.redBright('Title cannot be empty.'));
+            continue;
+        }
+        const author = await prompt('Enter author (or !q to quit): ');
+        if (author.trim() === '!q') return callback();
+        if (!isNonEmptyString(author)) {
+            console.log(chalk.redBright('Author cannot be empty.'));
+            continue;
+        }
+        const copiesStr = await prompt('Enter number of copies (or !q to quit): ');
+        if (copiesStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(copiesStr)) {
+            console.log(chalk.redBright('Invalid number of copies.'));
+            continue;
+        }
+        const copies = parseInt(copiesStr);
+        lib.addBook({ id, title, author, copies, borrowedCount: 0, borrowedBy: [] });
+        console.log(chalk.greenBright('✔ Book added.'));
+        return callback();
+    }
 }
 
-function borrowBook(callback: () => void) {
-    prompt('Enter book ID to borrow: ').then(bidStr => {
+async function borrowBook(callback: () => void) {
+    while (true) {
+        const bidStr = await prompt('Enter book ID to borrow (or !q to quit): ');
+        if (bidStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(bidStr)) {
+            console.log(chalk.redBright('Invalid book ID.'));
+            continue;
+        }
         const bid = parseInt(bidStr);
-        prompt('Enter your user ID: ').then(borrowerIdStr => {
-            const borrowerId = parseInt(borrowerIdStr);
-            const result = lib.borrowBook(bid, borrowerId);
-            if (result === true) {
-                console.log(chalk.greenBright('✔ Book borrowed.'));
-            } else if (typeof result === 'string') {
-                console.log(chalk.redBright('✖ Cannot borrow this book:'), chalk.yellow(result));
-            } else {
-                console.log(chalk.redBright('✖ Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.'));
-            }
-            callback();
-        });
-    });
+        const borrowerIdStr = await prompt('Enter your user ID (or !q to quit): ');
+        if (borrowerIdStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(borrowerIdStr)) {
+            console.log(chalk.redBright('Invalid user ID.'));
+            continue;
+        }
+        const borrowerId = parseInt(borrowerIdStr);
+        const result = lib.borrowBook(bid, borrowerId);
+        if (result === true) {
+            console.log(chalk.greenBright('✔ Book borrowed.'));
+            return callback();
+        } else if (typeof result === 'string') {
+            console.log(chalk.redBright('✖ Cannot borrow this book:'), chalk.yellow(result));
+        } else {
+            console.log(chalk.redBright('✖ Cannot borrow this book. Make sure the book is available, you have not borrowed it yet, and user exists.'));
+        }
+        const again = await prompt('Try again? (y/n): ');
+        if (again.trim().toLowerCase() !== 'y') return callback();
+    }
 }
 
-function returnBook(callback: () => void) {
-    prompt('Enter your user ID (or !q to quit): ').then(returnerIdInput => {
-        if (returnerIdInput.trim() === '!q') {
-            callback();
-            return;
+async function returnBook(callback: () => void) {
+    while (true) {
+        const returnerIdInput = await prompt('Enter your user ID (or !q to quit): ');
+        if (returnerIdInput.trim() === '!q') return callback();
+        if (!isPositiveInteger(returnerIdInput)) {
+            console.log(chalk.redBright('Invalid user ID.'));
+            continue;
         }
         const returnerId = parseInt(returnerIdInput);
         const user = lib.getUserById(returnerId);
         if (!user) {
             console.log(chalk.redBright('✖ User not found.'));
-            callback();
-            return;
+            continue;
         }
         const borrowedBooks = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(returnerId));
         if (borrowedBooks.length === 0) {
             console.log(chalk.yellowBright('You have not borrowed any books.'));
-            callback();
-            return;
+            return callback();
         }
         console.log('Books you are currently borrowing:');
         borrowedBooks.forEach(b => {
@@ -126,23 +160,27 @@ function returnBook(callback: () => void) {
             }
             console.log(`#${b.id} - ${b.title} by ${b.author}${time}`);
         });
-        prompt('Enter book ID to return (or !q to quit): ').then(ridInput => {
-            if (ridInput.trim() === '!q') {
-                callback();
-                return;
+        while (true) {
+            const ridInput = await prompt('Enter book ID to return (or !q to quit): ');
+            if (ridInput.trim() === '!q') return callback();
+            if (!isPositiveInteger(ridInput)) {
+                console.log(chalk.redBright('Invalid book ID.'));
+                continue;
             }
             const rid = parseInt(ridInput);
             if (lib.returnBook(rid, returnerId)) {
                 console.log(chalk.greenBright('✔ Book returned.'));
+                return callback();
             } else {
                 console.log(chalk.redBright('✖ Cannot return this book. Make sure you have borrowed it.'));
+                const again = await prompt('Try again? (y/n): ');
+                if (again.trim().toLowerCase() !== 'y') return callback();
             }
-            callback();
-        });
-    });
+        }
+    }
 }
 
-function showUsers(callback: () => void) {
+async function showUsers(callback: () => void) {
     const users = lib.listUsers();
     const table = new Table({
         head: [chalk.cyanBright('ID'), chalk.cyanBright('Name'), chalk.cyanBright('Age')],
@@ -156,34 +194,40 @@ function showUsers(callback: () => void) {
     callback();
 }
 
-function addUser(callback: () => void) {
-    prompt('Enter user ID: ').then(userIdStr => {
+async function addUser(callback: () => void) {
+    while (true) {
+        const userIdStr = await prompt('Enter user ID (or !q to quit): ');
+        if (userIdStr.trim() === '!q') return callback();
         if (!isPositiveInteger(userIdStr)) {
             console.log(chalk.redBright('Invalid user ID.'));
-            return addUser(callback);
+            continue;
         }
         const userId = parseIntSafe(userIdStr);
-        prompt('Enter user name: ').then(name => {
-            if (!isNonEmptyString(name)) {
-                console.log(chalk.redBright('Name cannot be empty.'));
-                return addUser(callback);
-            }
-            prompt('Enter user age: ').then(ageStr => {
-                if (!isPositiveInteger(ageStr)) {
-                    console.log(chalk.redBright('Invalid age.'));
-                    return addUser(callback);
-                }
-                const age = parseIntSafe(ageStr);
-                const user = new UserClass(userId, name, age);
-                lib.addUser(user);
-                console.log(chalk.greenBright('✔ User added.'));
-                callback();
-            });
-        });
-    });
+        if (lib.listUsers().some(u => u.id === userId)) {
+            console.log(chalk.redBright('User ID already exists. Please enter a unique ID.'));
+            continue;
+        }
+        const name = await prompt('Enter user name (or !q to quit): ');
+        if (name.trim() === '!q') return callback();
+        if (!isNonEmptyString(name)) {
+            console.log(chalk.redBright('Name cannot be empty.'));
+            continue;
+        }
+        const ageStr = await prompt('Enter user age (or !q to quit): ');
+        if (ageStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(ageStr)) {
+            console.log(chalk.redBright('Invalid age.'));
+            continue;
+        }
+        const age = parseIntSafe(ageStr);
+        const user = new UserClass(userId, name, age);
+        lib.addUser(user);
+        console.log(chalk.greenBright('✔ User added.'));
+        return callback();
+    }
 }
 
-function searchBooks(callback: () => void) {
+async function searchBooks(callback: () => void) {
     function searchLoop() {
         prompt('Enter keyword to search (title/author, !q to quit): ').then(keyword => {
             const kw = keyword.toLowerCase();
@@ -235,7 +279,7 @@ function searchBooks(callback: () => void) {
     searchLoop();
 }
 
-function showBorrowedBooks(callback: () => void) {
+async function showBorrowedBooks(callback: () => void) {
     const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.length > 0);
     if (books.length === 0) {
         console.log(chalk.yellowBright('No books are currently borrowed.'));
@@ -248,7 +292,7 @@ function showBorrowedBooks(callback: () => void) {
             let userInfo = '';
             if (b.borrowedBy && b.borrowedBy.length > 0) {
                 userInfo = b.borrowedBy.map(uid => {
-                    const user = lib.getUserById(uid);                    
+                    const user = lib.getUserById(uid);
                     let time = '';
                     if (b.borrowedRecords) {
                         const rec = [...b.borrowedRecords].reverse().find(r => r.userId === uid && !r.returnedAt);
@@ -275,14 +319,19 @@ function showBorrowedBooks(callback: () => void) {
     callback();
 }
 
-function checkUserDebts(callback: () => void) {
-    prompt('Enter user ID to check: ').then(userIdStr => {
+async function checkUserDebts(callback: () => void) {
+    while (true) {
+        const userIdStr = await prompt('Enter user ID to check (or !q to quit): ');
+        if (userIdStr.trim() === '!q') return callback();
+        if (!isPositiveInteger(userIdStr)) {
+            console.log(chalk.redBright('Invalid user ID.'));
+            continue;
+        }
         const userId = parseInt(userIdStr);
         const user = lib.getUserById(userId);
         if (!user) {
             console.log(chalk.redBright('✖ User not found.'));
-            callback();
-            return;
+            continue;
         }
         const books = lib.list().filter(b => b.borrowedBy && b.borrowedBy.includes(userId));
         if (books.length === 0) {
@@ -309,8 +358,8 @@ function checkUserDebts(callback: () => void) {
             console.log(table.toString());
             console.log(chalk.greenBright('---------------------------------'));
         }
-        callback();
-    });
+        return callback();
+    }
 }
 
 async function mainMenu() {
@@ -344,7 +393,7 @@ async function mainMenu() {
         case '9':
             checkUserDebts(mainMenu);
             break;
-        case '0':          
+        case '0':
             const save = (await prompt('Do you want to save changes before exiting? (y/n): ')).toLowerCase();
             if (save === 'y' || save === 'yes') {
                 lib.saveAll();
