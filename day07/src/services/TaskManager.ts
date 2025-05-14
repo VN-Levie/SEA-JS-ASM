@@ -42,17 +42,11 @@ export class TaskManager {
     }
 
     @LogMethodIO
-    public getTaskById(id: number): Task {
-        var task = new Task('test', 'test', TaskStatus.ToDo, TaskPriority.Low);
+    public getTaskById(id: number): Task | undefined {
+        var task;
         for (let index = 0; index < this.tasks.length; index++) {
-            if (index == 0) {
-                console.log('Is task an instance of this.tasks[index]?', this.tasks[index] instanceof Task);
-                console.log('Type of his.tasks[index]:', typeof this.tasks[index]);
-            }
             const element: Task = this.tasks[index];
             if (element.id === id) {
-                console.log('Is task an instance of element?', element instanceof Task);
-                console.log('Type of element:', typeof element);
                 return element;
             }
         }
@@ -65,9 +59,7 @@ export class TaskManager {
 
     @LogMethodIO
     public async updateTask(id: number, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | undefined> {
-        const task: Task = this.getTaskById(id);
-        const element: Task = this.tasks[0];
-
+        const task: Task | undefined = this.getTaskById(id);
         if (task) {
             task.update(updates);
             return task;
