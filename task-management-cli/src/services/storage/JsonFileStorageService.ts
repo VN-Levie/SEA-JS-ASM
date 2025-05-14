@@ -56,8 +56,8 @@ export class JsonFileStorageService implements IStorageService {
                 data.status as TaskStatus,
                 data.priority as TaskPriority,
                 data.dueDate ? new Date(data.dueDate) : undefined,
-                data.assigneeId,
-                data.id,
+                typeof data.assigneeId === 'number' ? data.assigneeId : undefined,
+                typeof data.id === 'number' ? data.id : undefined,
                 data.createdAt ? new Date(data.createdAt) : new Date(),
                 data.updatedAt ? new Date(data.updatedAt) : new Date()
             );
@@ -65,7 +65,6 @@ export class JsonFileStorageService implements IStorageService {
     }
 
     async saveTasks(tasks: Task[]): Promise<void> {
-        // Convert Task instances to plain objects for JSON serialization
         const plainTasks = tasks.map(task => ({
             id: task.id,
             title: task.title,
@@ -73,7 +72,7 @@ export class JsonFileStorageService implements IStorageService {
             status: task.status,
             priority: task.priority,
             dueDate: task.dueDate ? task.dueDate.toISOString() : null,
-            assigneeId: task.assigneeId,
+            assigneeId: typeof task.assigneeId === 'number' ? task.assigneeId : undefined,
             createdAt: task.createdAt ? task.createdAt.toISOString() : null,
             updatedAt: task.updatedAt ? task.updatedAt.toISOString() : null
         }));
@@ -85,12 +84,17 @@ export class JsonFileStorageService implements IStorageService {
             return new User(
                 data.name,
                 data.email,
-                data.id
+                typeof data.id === 'number' ? data.id : undefined
             );
         });
     }
 
     async saveUsers(users: User[]): Promise<void> {
-        await this.writeFile(USERS_FILE_PATH, users);
+        const plainUsers = users.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email
+        }));
+        await this.writeFile(USERS_FILE_PATH, plainUsers);
     }
 }

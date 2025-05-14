@@ -6,9 +6,36 @@ import { displayTasks, displayUsers, printMessage } from './utils/cliUtils';
 import { Task, TaskPriority, TaskStatus } from './models/Task';
 import { User } from './models/User';
 import chalk from 'chalk'; // Inquirer dùng chalk nên có thể tận dụng
+import { parseNaturalDate } from './utils/dateUtils';
 
 const storageService: IStorageService = new JsonFileStorageService();
 const taskManager = TaskManager.getInstance(storageService);
+
+// --- Add process exit handler for auto-save ---
+let isSaving = false;
+async function saveOnExit() {
+    if (isSaving) return;
+    isSaving = true;
+    try {
+        await taskManager.saveAll();
+        // Optionally: console.log('Data saved on exit.');
+    } catch (e) {
+        // Optionally: console.error('Failed to save data on exit:', e);
+    }
+}
+process.on('SIGINT', async () => {
+    await saveOnExit();
+    process.exit();
+});
+process.on('SIGTERM', async () => {
+    await saveOnExit();
+    process.exit();
+});
+process.on('exit', () => {
+    // Note: async not supported here, but for completeness
+    if (!isSaving) taskManager.saveAll();
+});
+// --- End process exit handler ---
 
 async function mainLoop() {
     await taskManager.initialize(); // Tải dữ liệu khi bắt đầu
@@ -94,13 +121,40 @@ async function handleAddTask() {
             choices: Object.values(TaskPriority),
             default: TaskPriority.Medium,
         },
-        { type: 'input', name: 'dueDate', message: 'Due Date (YYYY-MM-DD, optional):', validate: input => {
-            if (!input) return true;
-            return /^\d{4}-\d{2}-\d{2}$/.test(input) ? true : 'Please use YYYY-MM-DD format.';
-        }},
+        {
+            type: 'list',
+            name: 'dueDatePreset',
+            message: 'Due Date:',
+            choices: [
+                { name: 'No due date', value: '' },
+                { name: 'In 1 day', value: '1 day' },
+                { name: 'In 7 days', value: '7 days' },
+                { name: 'In 1 month', value: '1 month' },
+                { name: 'Enter custom (e.g. "7 days", "12h", "this last month", or YYYY-MM-DD)', value: 'custom' }
+            ],
+            default: '',
+        },
+        {
+            type: 'input',
+            name: 'dueDateCustom',
+            message: 'Enter due date (e.g. "7 days", "12h", "this last month", or YYYY-MM-DD):',
+            when: (answers) => answers.dueDatePreset === 'custom',
+            validate: input => {
+                if (!input) return true;
+                const date = parseNaturalDate(input);
+                if (!date || isNaN(date.getTime())) return 'Invalid date format or expression.';
+                return true;
+            }
+        }
     ]);
 
-    const dueDate = answers.dueDate ? new Date(answers.dueDate) : undefined;
+    let dueDate: Date | undefined = undefined;
+    if (answers.dueDatePreset && answers.dueDatePreset !== 'custom') {
+        dueDate = parseNaturalDate(answers.dueDatePreset);
+    } else if (answers.dueDatePreset === 'custom' && answers.dueDateCustom) {
+        dueDate = parseNaturalDate(answers.dueDateCustom);
+    }
+
     const newTask = await taskManager.addTask(answers.title, answers.description, answers.priority, dueDate);
     printMessage(`Task "${newTask.title}" added with ID: ${newTask.id}`, 'success');
 }
@@ -112,9 +166,9 @@ function handleListTasks() {
 
 async function handleGetTaskById() {
     const { taskId } = await inquirer.prompt([
-        { type: 'input', name: 'taskId', message: 'Enter Task ID:', validate: input => input ? true : 'Task ID cannot be empty.' },
+        { type: 'input', name: 'taskId', message: 'Enter Task ID:', validate: input => /^\d+$/.test(input) ? true : 'Task ID must be a number.' },
     ]);
-    const task = taskManager.getTaskById(taskId);
+    const task = taskManager.getTaskById(Number(taskId));
     if (task) {
         displayTasks([task]);
     } else {
@@ -146,7 +200,7 @@ async function handleUpdateTaskStatus() {
             choices: Object.values(TaskStatus),
         },
     ]);
-    const updatedTask = await taskManager.updateTask(taskIdToUpdate, { status: newStatus as TaskStatus });
+    const updatedTask = await taskManager.updateTask(Number(taskIdToUpdate), { status: newStatus as TaskStatus });
     if (updatedTask) {
         printMessage(`Task "${updatedTask.title}" status updated to ${newStatus}.`, 'success');
     } else {
@@ -156,7 +210,7 @@ async function handleUpdateTaskStatus() {
 
 async function handleUpdateTaskDetails() {
     const tasks = taskManager.getAllTasks();
-     if (tasks.length === 0) {
+    if (tasks.length === 0) {
         printMessage('No tasks available to update.', 'info');
         return;
     }
@@ -170,11 +224,13 @@ async function handleUpdateTaskDetails() {
         }
     ]);
 
-    const taskToUpdate = taskManager.getTaskById(taskIdToUpdate);
+    const taskToUpdate = taskManager.getTaskById(Number(taskIdToUpdate));
     if (!taskToUpdate) {
         printMessage('Task not found.', 'error');
         return;
     }
+
+    const currentDueDateStr = taskToUpdate.dueDate ? taskToUpdate.dueDate.toISOString().split('T')[0] : '';
 
     const updates = await inquirer.prompt([
         { type: 'input', name: 'title', message: `New Title (current: ${taskToUpdate.title}):`, default: taskToUpdate.title },
@@ -186,10 +242,31 @@ async function handleUpdateTaskDetails() {
             choices: Object.values(TaskPriority),
             default: taskToUpdate.priority,
         },
-        { type: 'input', name: 'dueDate', message: `New Due Date (YYYY-MM-DD, current: ${taskToUpdate.dueDate ? taskToUpdate.dueDate.toISOString().split('T')[0] : ''}):`, default: taskToUpdate.dueDate ? taskToUpdate.dueDate.toISOString().split('T')[0] : '', validate: input => {
-            if (!input) return true;
-            return /^\d{4}-\d{2}-\d{2}$/.test(input) ? true : 'Please use YYYY-MM-DD format.';
-        }},
+        {
+            type: 'list',
+            name: 'dueDatePreset',
+            message: `New Due Date (current: ${currentDueDateStr}):`,
+            choices: [
+                { name: 'No due date', value: '' },
+                { name: 'In 1 day', value: '1 day' },
+                { name: 'In 7 days', value: '7 days' },
+                { name: 'In 1 month', value: '1 month' },
+                { name: 'Enter custom (e.g. "7 days", "12h", "this last month", or YYYY-MM-DD)', value: 'custom' }
+            ],
+            default: '',
+        },
+        {
+            type: 'input',
+            name: 'dueDateCustom',
+            message: 'Enter due date (e.g. "7 days", "12h", "this last month", or YYYY-MM-DD):',
+            when: (answers) => answers.dueDatePreset === 'custom',
+            validate: input => {
+                if (!input) return true;
+                const date = parseNaturalDate(input);
+                if (!date || isNaN(date.getTime())) return 'Invalid date format or expression.';
+                return true;
+            }
+        }
     ]);
 
     const finalUpdates: Partial<Task> = {};
@@ -197,14 +274,18 @@ async function handleUpdateTaskDetails() {
     if (updates.description !== (taskToUpdate.description || '')) finalUpdates.description = updates.description;
     if (updates.priority !== taskToUpdate.priority) finalUpdates.priority = updates.priority as TaskPriority;
 
-    const currentDueDateStr = taskToUpdate.dueDate ? taskToUpdate.dueDate.toISOString().split('T')[0] : '';
-    if (updates.dueDate !== currentDueDateStr) {
-        finalUpdates.dueDate = updates.dueDate ? new Date(updates.dueDate) : undefined;
+    let dueDate: Date | undefined = undefined;
+    if (updates.dueDatePreset && updates.dueDatePreset !== 'custom') {
+        dueDate = parseNaturalDate(updates.dueDatePreset);
+    } else if (updates.dueDatePreset === 'custom' && updates.dueDateCustom) {
+        dueDate = parseNaturalDate(updates.dueDateCustom);
+    }
+    if (dueDate !== undefined || updates.dueDatePreset === '') {
+        finalUpdates.dueDate = dueDate;
     }
 
-
     if (Object.keys(finalUpdates).length > 0) {
-        const updatedTask = await taskManager.updateTask(taskIdToUpdate, finalUpdates);
+        const updatedTask = await taskManager.updateTask(Number(taskIdToUpdate), finalUpdates);
         if (updatedTask) {
             printMessage(`Task "${updatedTask.title}" details updated.`, 'success');
         } else {
@@ -214,7 +295,6 @@ async function handleUpdateTaskDetails() {
         printMessage('No changes detected.', 'info');
     }
 }
-
 
 async function handleDeleteTask() {
     const tasks = taskManager.getAllTasks();
@@ -237,7 +317,7 @@ async function handleDeleteTask() {
     ]);
 
     if (confirmDelete) {
-        const deleted = await taskManager.deleteTask(taskIdToDelete);
+        const deleted = await taskManager.deleteTask(Number(taskIdToDelete));
         if (deleted) {
             printMessage(`Task with ID "${taskIdToDelete}" deleted.`, 'success');
         } else {
@@ -295,9 +375,9 @@ async function handleAssignTask() {
         }
     ]);
     
-    const assigneeId = userIdToAssign === null ? undefined : userIdToAssign;
+    const assigneeId = userIdToAssign === null ? undefined : Number(userIdToAssign);
 
-    const assignedTask = await taskManager.updateTask(taskIdToAssign, { assigneeId: assigneeId });
+    const assignedTask = await taskManager.updateTask(Number(taskIdToAssign), { assigneeId: assigneeId });
 
     if (assignedTask) {
         if(assigneeId) {

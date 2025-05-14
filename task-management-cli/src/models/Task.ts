@@ -16,7 +16,8 @@ export enum TaskPriority {
 
 @LogClassCreation
 export class Task {
-    public readonly id: string;
+    private static nextId = 1;
+    public readonly id: number;
     public title: string;
     public description?: string;
     public status: TaskStatus;
@@ -24,7 +25,7 @@ export class Task {
     public dueDate?: Date;
     public readonly createdAt: Date;
     public updatedAt: Date;
-    public assigneeId?: string;
+    public assigneeId?: number;
 
     constructor(
         title: string,
@@ -32,12 +33,19 @@ export class Task {
         status: TaskStatus = TaskStatus.ToDo,
         priority: TaskPriority = TaskPriority.Medium,
         dueDate?: Date,
-        assigneeId?: string,
-        id?: string,
+        assigneeId?: number,
+        id?: number,
         createdAt?: Date,
         updatedAt?: Date
     ) {
-        this.id = id || generateUUID();
+        if (typeof id === 'number') {
+            this.id = id;
+            if (id >= Task.nextId) {
+                Task.nextId = id + 1;
+            }
+        } else {
+            this.id = Task.nextId++;
+        }
         this.title = title;
         this.description = description;
         this.status = status;

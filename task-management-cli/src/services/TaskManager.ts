@@ -34,30 +34,27 @@ export class TaskManager {
         description?: string,
         priority?: TaskPriority,
         dueDate?: Date,
-        assigneeId?: string
+        assigneeId?: number
     ): Promise<Task> {
         const newTask = new Task(title, description, TaskStatus.ToDo, priority, dueDate, assigneeId);
         this.tasks.push(newTask);
-        await this.storageService.saveTasks(this.tasks);
         return newTask;
     }
 
     @LogMethodIO
-    public getTaskById(id: string): Task {
+    public getTaskById(id: number): Task {
         var task = new Task('test', 'test', TaskStatus.ToDo, TaskPriority.Low);
-        // return this.tasks.find(task => task.id === id);
         for (let index = 0; index < this.tasks.length; index++) {
             if (index == 0) {
-                console.log('Is task an instance of this.tasks[index]?', this.tasks[index] instanceof Task); // QUAN TRỌNG
-                console.log('Type of his.tasks[index]:', typeof this.tasks[index]); // Xem kiểu của thuộc tính update
+                console.log('Is task an instance of this.tasks[index]?', this.tasks[index] instanceof Task);
+                console.log('Type of his.tasks[index]:', typeof this.tasks[index]);
             }
             const element: Task = this.tasks[index];
             if (element.id === id) {
-                console.log('Is task an instance of element?', element instanceof Task); // QUAN TRỌNG
-                console.log('Type of element:', typeof element); // Xem kiểu của thuộc tính update
+                console.log('Is task an instance of element?', element instanceof Task);
+                console.log('Type of element:', typeof element);
                 return element;
             }
-
         }
         return task;
     }
@@ -67,47 +64,34 @@ export class TaskManager {
     }
 
     @LogMethodIO
-    public async updateTask(id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | undefined> {
+    public async updateTask(id: number, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | undefined> {
         const task: Task = this.getTaskById(id);
-        console.log('00:Is task an instance of Task?', task instanceof Task); // QUAN TRỌNG
-        console.log('00:Type of task:', typeof task); // Xem kiểu của thuộc tính update
         const element: Task = this.tasks[0];
-        console.log('Is task an instance of element?', element instanceof Task); // QUAN TRỌNG
-        console.log('Type of element:', typeof element); // Xem kiểu của thuộc tính update
 
         if (task) {
-            console.log(`--- Debugging updateTask for ID: ${id} ---`);
-            console.log('Is task an instance of Task?', task instanceof Task); // QUAN TRỌNG
-            console.log('Type of task:', typeof task); // Xem kiểu của thuộc tính update
-            console.log('Type of task.update:', typeof (task as any).update); // Xem kiểu của thuộc tính update
-            console.log('Task object keys:', Object.keys(task));
-            console.log('Task prototype:', Object.getPrototypeOf(task));
             task.update(updates);
-            await this.storageService.saveTasks(this.tasks);
             return task;
         }
         return undefined;
     }
 
     @LogMethodIO
-    public async deleteTask(id: string): Promise<boolean> {
+    public async deleteTask(id: number): Promise<boolean> {
         const initialLength = this.tasks.length;
         this.tasks = this.tasks.filter(task => task.id !== id);
         if (this.tasks.length < initialLength) {
-            await this.storageService.saveTasks(this.tasks);
             return true;
         }
         return false;
     }
 
     @LogMethodIO
-    public async assignTaskToUser(taskId: string, userId: string): Promise<Task | undefined> {
+    public async assignTaskToUser(taskId: number, userId: number): Promise<Task | undefined> {
         const task = this.getTaskById(taskId);
         const user = this.getUserById(userId);
         if (task && user) {
             task.assigneeId = user.id;
             task.updatedAt = new Date();
-            await this.storageService.saveTasks(this.tasks);
             return task;
         }
         return undefined;
@@ -127,7 +111,6 @@ export class TaskManager {
     public async addUser(name: string, email?: string): Promise<User> {
         const newUser = new User(name, email);
         this.users.push(newUser);
-        await this.storageService.saveUsers(this.users);
         return newUser;
     }
 
@@ -135,7 +118,20 @@ export class TaskManager {
         return [...this.users];
     }
 
-    public getUserById(id: string): User | undefined {
+    public getUserById(id: number): User | undefined {
         return this.users.find(user => user.id === id);
+    }
+
+    public async saveAllTasks(): Promise<void> {
+        await this.storageService.saveTasks(this.tasks);
+    }
+
+    public async saveAllUsers(): Promise<void> {
+        await this.storageService.saveUsers(this.users);
+    }
+
+    public async saveAll(): Promise<void> {
+        await this.saveAllTasks();
+        await this.saveAllUsers();
     }
 }
