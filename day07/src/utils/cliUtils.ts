@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import Table from 'cli-table3';
 import { Task, TaskPriority, TaskStatus } from '../models/Task';
 import { User } from '../models/User';
 import { formatDate } from './dateUtils';
@@ -45,14 +44,15 @@ export function displayUsers(users: User[]): void {
         console.log(chalk.yellow('\nNo users to display.'));
         return;
     }
-    const table = new Table({
-        head: [chalk.cyanBright.bold('ID'), chalk.cyanBright.bold('Name'), chalk.cyanBright.bold('Email')],
-        colWidths: [38, 30, 30]
-    });
+    console.log(chalk.bold.cyanBright('\n=== User List ==='));
     users.forEach(user => {
-        table.push([user.id, user.name, user.email || chalk.dim('N/A')]);
+        console.log(
+            chalk.bold('ID: ') + chalk.cyan(user.id) + '\n' +
+            chalk.bold('Name: ') + chalk.white(user.name) + '\n' +
+            chalk.bold('Email: ') + (user.email ? chalk.white(user.email) : chalk.dim('N/A')) + '\n' +
+            chalk.dim('─'.repeat(40))
+        );
     });
-    console.log("\n" + table.toString());
 }
 
 export function printMessage(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info'): void {

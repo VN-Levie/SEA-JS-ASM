@@ -96,6 +96,9 @@ async function mainLoop() {
                     break;
                 case 'exit':
                     printMessage('Exiting Task Manager. Goodbye!', 'info');
+                    isSaving = true; // Đánh dấu là đang lưu
+                    await taskManager.saveAll(); // Lưu dữ liệu trước khi thoát
+                    process.exit(0);
                     return;
             }
         } catch (error) {
@@ -105,7 +108,7 @@ async function mainLoop() {
                 printMessage('An unknown error occurred.', 'error');
             }
         }
-        await inquirer.prompt([{ type: 'input', name: 'continue', message: chalk.dim('\nPress Enter to continue...'), default:'' }]);
+        await inquirer.prompt([{ type: 'input', name: 'continue', message: chalk.dim('\nPress Enter to continue...'), default: '' }]);
         console.clear(); // Xóa màn hình cho menu tiếp theo (có thể không hoạt động trên mọi terminal)
     }
 }
@@ -187,7 +190,7 @@ async function handleUpdateTaskStatus() {
             type: 'list',
             name: 'taskIdToUpdate',
             message: 'Select Task to update status:',
-            choices: tasks.map(task => ({name: `${task.title} (ID: ${task.id})`, value: task.id})),
+            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id})`, value: task.id })),
             pageSize: 10
         }
     ]);
@@ -219,7 +222,7 @@ async function handleUpdateTaskDetails() {
             type: 'list',
             name: 'taskIdToUpdate',
             message: 'Select Task to update details:',
-            choices: tasks.map(task => ({name: `${task.title} (ID: ${task.id})`, value: task.id})),
+            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id})`, value: task.id })),
             pageSize: 10
         }
     ]);
@@ -307,13 +310,13 @@ async function handleDeleteTask() {
             type: 'list',
             name: 'taskIdToDelete',
             message: 'Select Task to delete:',
-            choices: tasks.map(task => ({name: `${task.title} (ID: ${task.id})`, value: task.id})),
+            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id})`, value: task.id })),
             pageSize: 10
         }
     ]);
 
     const { confirmDelete } = await inquirer.prompt([
-        { type: 'confirm', name: 'confirmDelete', message: `Are you sure you want to delete task ID ${taskIdToDelete}?`, default: false}
+        { type: 'confirm', name: 'confirmDelete', message: `Are you sure you want to delete task ID ${taskIdToDelete}?`, default: false }
     ]);
 
     if (confirmDelete) {
@@ -360,27 +363,27 @@ async function handleAssignTask() {
             type: 'list',
             name: 'taskIdToAssign',
             message: 'Select Task to assign:',
-            choices: tasks.map(task => ({name: `${task.title} (ID: ${task.id}, Current Assignee: ${task.assigneeId || 'None'})`, value: task.id})),
+            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id}, Current Assignee: ${task.assigneeId || 'None'})`, value: task.id })),
             pageSize: 10
         }
     ]);
 
-     const { userIdToAssign } = await inquirer.prompt([
+    const { userIdToAssign } = await inquirer.prompt([
         {
             type: 'list',
             name: 'userIdToAssign',
             message: 'Select User to assign to:',
-            choices: [{name: 'Unassign Task', value: null}, ...users.map(user => ({name: `${user.name} (ID: ${user.id})`, value: user.id}))],
+            choices: [{ name: 'Unassign Task', value: null }, ...users.map(user => ({ name: `${user.name} (ID: ${user.id})`, value: user.id }))],
             pageSize: 10
         }
     ]);
-    
+
     const assigneeId = userIdToAssign === null ? undefined : Number(userIdToAssign);
 
     const assignedTask = await taskManager.updateTask(Number(taskIdToAssign), { assigneeId: assigneeId });
 
     if (assignedTask) {
-        if(assigneeId) {
+        if (assigneeId) {
             printMessage(`Task "${assignedTask.title}" assigned to user ID "${assigneeId}".`, 'success');
         } else {
             printMessage(`Task "${assignedTask.title}" unassigned.`, 'success');
