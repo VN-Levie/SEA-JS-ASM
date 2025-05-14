@@ -23,8 +23,6 @@
     "inquirer": "^12.6.1"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.19.5",
-    "@types/express": "^5.0.1",
     "@types/inquirer": "^9.0.8",
     "@types/node": "^20.11.20",
     "ts-node": "^10.9.2",

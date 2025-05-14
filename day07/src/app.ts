@@ -4,22 +4,21 @@ import { JsonFileStorageService } from './services/storage/JsonFileStorageServic
 import { IStorageService } from './services/storage/IStorageService';
 import { displayTasks, displayUsers, printMessage } from './utils/cliUtils';
 import { Task, TaskPriority, TaskStatus } from './models/Task';
-import chalk from 'chalk';
+import { User } from './models/User';
+import chalk from 'chalk'; // Inquirer dùng chalk nên có thể tận dụng
 import { parseNaturalDate } from './utils/dateUtils';
-import express from 'express';
-
-import bodyParser from 'body-parser';
 
 const storageService: IStorageService = new JsonFileStorageService();
 const taskManager = TaskManager.getInstance(storageService);
 
-
+// --- Add process exit handler for auto-save ---
 let isSaving = false;
 async function saveOnExit() {
     if (isSaving) return;
     isSaving = true;
     try {
-        await taskManager.saveAll();     
+        await taskManager.saveAll();
+        // Optionally: console.log('Data saved on exit.');
     } catch (e) {
         // Optionally: console.error('Failed to save data on exit:', e);
     }
@@ -32,106 +31,16 @@ process.on('SIGTERM', async () => {
     await saveOnExit();
     process.exit();
 });
-process.on('exit', () => { 
+process.on('exit', () => {
+    // Note: async not supported here, but for completeness
     if (!isSaving) taskManager.saveAll();
 });
-
-
-// --- Express REST API setup ---
-const app = express();
-app.use(bodyParser.json());
-
-// Tasks endpoints
-app.get('/api/tasks', async (req, res) => {
-    await taskManager.initialize();
-    res.json(taskManager.getAllTasks());
-});
-
-app.get('/api/tasks/:id', async (req, res) => {
-    await taskManager.initialize();
-    const task = taskManager.getTaskById(Number(req.params.id));
-    if (task) {
-        res.json(task);
-    } else {
-        res.status(404).json({ error: 'Task not found' });
-    }
-});
-
-app.post('/api/tasks', async (req, res) => {
-    await taskManager.initialize();
-    const { title, description, priority, dueDate, assigneeId } = req.body;
-    if (!title) {
-        res.status(400).json({ error: 'Title is required' });
-        return;
-    }
-    const task = await taskManager.addTask(title, description, priority, dueDate ? new Date(dueDate) : undefined, assigneeId);
-    await taskManager.saveAllTasks();
-    res.status(201).json(task);
-});
-
-app.put('/api/tasks/:id', async (req, res) => {
-    await taskManager.initialize();
-    const updates = req.body;
-    if (updates.dueDate) updates.dueDate = new Date(updates.dueDate);
-    const updated = await taskManager.updateTask(Number(req.params.id), updates);
-    if (updated) {
-        await taskManager.saveAllTasks();
-        res.json(updated);
-    } else {
-        res.status(404).json({ error: 'Task not found' });
-    }
-});
-
-app.delete('/api/tasks/:id', async (req, res) => {
-    await taskManager.initialize();
-    const deleted = await taskManager.deleteTask(Number(req.params.id));
-    if (deleted) {
-        await taskManager.saveAllTasks();
-        res.json({ success: true });
-    } else {
-        res.status(404).json({ error: 'Task not found' });
-    }
-});
-
-// Users endpoints
-app.get('/api/users', async (req, res) => {
-    await taskManager.initialize();
-    res.json(taskManager.getAllUsers());
-});
-
-app.get('/api/users/:id', async (req, res) => {
-    await taskManager.initialize();
-    const user = taskManager.getUserById(Number(req.params.id));
-    if (user) {
-        res.json(user);
-    } else {
-        res.status(404).json({ error: 'User not found' });
-    }
-});
-
-app.post('/api/users', async (req, res) => {
-    await taskManager.initialize();
-    const { name, email } = req.body;
-    if (!name) {
-        res.status(400).json({ error: 'Name is required' });
-        return;
-    }
-    const user = await taskManager.addUser(name, email);
-    await taskManager.saveAllUsers();
-    res.status(201).json(user);
-});
-
-// --- Start Express server ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`REST API server running at http://localhost:${PORT}/api`);
-});
-// --- End Express REST API setup ---
+// --- End process exit handler ---
 
 async function mainLoop() {
     await taskManager.initialize(); // Tải dữ liệu khi bắt đầu
 
-   
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         const { action } = await inquirer.prompt([
             {
@@ -187,8 +96,8 @@ async function mainLoop() {
                     break;
                 case 'exit':
                     printMessage('Exiting Task Manager. Goodbye!', 'info');
-                    isSaving = true; 
-                    await taskManager.saveAll();
+                    isSaving = true; // Đánh dấu là đang lưu
+                    await taskManager.saveAll(); // Lưu dữ liệu trước khi thoát
                     process.exit(0);
                     return;
             }
@@ -200,7 +109,7 @@ async function mainLoop() {
             }
         }
         await inquirer.prompt([{ type: 'input', name: 'continue', message: chalk.dim('\nPress Enter to continue...'), default: '' }]);
-        console.clear(); 
+        console.clear(); // Xóa màn hình cho menu tiếp theo (có thể không hoạt động trên mọi terminal)
     }
 }
 
