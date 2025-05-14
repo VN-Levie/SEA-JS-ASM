@@ -10,6 +10,7 @@ import { parseNaturalDate } from './utils/dateUtils';
 const storageService: IStorageService = new JsonFileStorageService();
 const taskManager = TaskManager.getInstance(storageService);
 
+let currentUser: import('./models/User').User | null = null;
 
 let isSaving = false;
 async function saveOnExit() {
@@ -33,9 +34,49 @@ process.on('exit', () => {
 });
 // --- End process exit handler ---
 
+async function loginFlow() {
+    const users = taskManager.getAllUsers();
+    if (users.length === 0) {
+        printMessage('No users found. Please create a user first.', 'warning');
+        await handleAddUser();
+    }
+    while (true) {
+        const { loginType } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'loginType',
+                message: 'Login by:',
+                choices: [
+                    { name: 'User ID', value: 'id' },
+                    { name: 'Email', value: 'email' },
+                ]
+            }
+        ]);
+        let user: import('./models/User').User | undefined;
+        if (loginType === 'id') {
+            const { id } = await inquirer.prompt([
+                { type: 'input', name: 'id', message: 'Enter your User ID:', validate: input => /^\d+$/.test(input) ? true : 'ID must be a number.' }
+            ]);
+            user = taskManager.getUserById(Number(id));
+        } else {
+            const { email } = await inquirer.prompt([
+                { type: 'input', name: 'email', message: 'Enter your Email:' }
+            ]);
+            user = users.find(u => u.email === email);
+        }
+        if (user) {
+            currentUser = user;
+            printMessage(`Logged in as ${user.name} (ID: ${user.id})`, 'success');
+            break;
+        } else {
+            printMessage('User not found. Try again.', 'error');
+        }
+    }
+}
+
 async function mainLoop() {
     await taskManager.initialize(); // Tải dữ liệu khi bắt đầu
-
+    await loginFlow();
     // eslint-disable-next-line no-constant-condition
     while (true) {
         const { action } = await inquirer.prompt([
@@ -46,6 +87,9 @@ async function mainLoop() {
                 choices: [
                     { name: '📝 Add New Task', value: 'addTask' },
                     { name: '📄 List All Tasks', value: 'listTasks' },
+                    { name: '🔍 Search Tasks', value: 'searchTasks' },
+                    { name: '🔎 Filter Tasks', value: 'filterTasks' },
+                    { name: '📊 Task Statistics', value: 'taskStats' },
                     { name: '🆔 Get Task by ID', value: 'getTaskById' },
                     { name: '🔄 Update Task Status', value: 'updateTaskStatus' },
                     { name: '✏️ Update Task Details', value: 'updateTaskDetails' },
@@ -54,10 +98,11 @@ async function mainLoop() {
                     { name: '👤 Add New User', value: 'addUser' },
                     { name: '👥 List All Users', value: 'listUsers' },
                     { name: '🤝 Assign Task to User', value: 'assignTask' },
+                    { name: '🔓 Logout', value: 'logout' },
                     new inquirer.Separator(),
                     { name: '🚪 Exit', value: 'exit' },
                 ],
-                pageSize: 15
+                pageSize: 18
             },
         ]);
 
@@ -68,6 +113,15 @@ async function mainLoop() {
                     break;
                 case 'listTasks':
                     handleListTasks();
+                    break;
+                case 'searchTasks':
+                    await handleSearchTasks();
+                    break;
+                case 'filterTasks':
+                    await handleFilterTasks();
+                    break;
+                case 'taskStats':
+                    await handleTaskStats();
                     break;
                 case 'getTaskById':
                     await handleGetTaskById();
@@ -89,6 +143,11 @@ async function mainLoop() {
                     break;
                 case 'assignTask':
                     await handleAssignTask();
+                    break;
+                case 'logout':
+                    currentUser = null;
+                    printMessage('Logged out.', 'info');
+                    await loginFlow();
                     break;
                 case 'exit':
                     printMessage('Exiting Task Manager. Goodbye!', 'info');
@@ -160,6 +219,80 @@ async function handleAddTask() {
 function handleListTasks() {
     const tasks = taskManager.getAllTasks();
     displayTasks(tasks);
+}
+
+async function handleSearchTasks() {
+    const { keyword } = await inquirer.prompt([
+        { type: 'input', name: 'keyword', message: 'Enter keyword to search (title/description):', validate: input => input.trim() ? true : 'Keyword cannot be empty.' }
+    ]);
+    const kw = keyword.trim().toLowerCase();
+    const tasks = taskManager.getAllTasks().filter(task =>
+        (task.title && task.title.toLowerCase().includes(kw)) ||
+        (task.description && task.description.toLowerCase().includes(kw))
+    );
+    if (tasks.length === 0) {
+        printMessage(`No tasks found for keyword "${keyword}".`, 'warning');
+    } else {
+        displayTasks(tasks);
+    }
+}
+
+async function handleFilterTasks() {
+    const filterChoices = [
+        { name: 'By Status', value: 'status' },
+        { name: 'By Priority', value: 'priority' },
+        { name: 'By Assignee', value: 'assignee' },
+        { name: 'Overdue Tasks', value: 'overdue' },
+    ];
+    const { filterType } = await inquirer.prompt([
+        { type: 'list', name: 'filterType', message: 'Filter tasks by:', choices: filterChoices }
+    ]);
+    let filtered: Task[] = [];
+    if (filterType === 'status') {
+        const { status } = await inquirer.prompt([
+            { type: 'list', name: 'status', message: 'Select status:', choices: Object.values(TaskStatus) }
+        ]);
+        filtered = taskManager.getTasksByStatus(status as TaskStatus);
+    } else if (filterType === 'priority') {
+        const { priority } = await inquirer.prompt([
+            { type: 'list', name: 'priority', message: 'Select priority:', choices: Object.values(TaskPriority) }
+        ]);
+        filtered = taskManager.getTasksByPriority(priority as TaskPriority);
+    } else if (filterType === 'assignee') {
+        const users = taskManager.getAllUsers();
+        if (users.length === 0) {
+            printMessage('No users found.', 'warning');
+            return;
+        }
+        const { userId } = await inquirer.prompt([
+            { type: 'list', name: 'userId', message: 'Select assignee:', choices: users.map(u => ({ name: `${u.name} (ID: ${u.id})`, value: u.id })) }
+        ]);
+        filtered = taskManager.getAllTasks().filter(task => task.assigneeId === userId);
+    } else if (filterType === 'overdue') {
+        filtered = taskManager.getAllTasks().filter(task => task.isOverdue());
+    }
+    if (filtered.length === 0) {
+        printMessage('No tasks found for this filter.', 'warning');
+    } else {
+        displayTasks(filtered);
+    }
+}
+
+async function handleTaskStats() {
+    const tasks = taskManager.getAllTasks();
+    const users = taskManager.getAllUsers();
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.status === TaskStatus.Done).length;
+    const overdue = tasks.filter(t => t.isOverdue()).length;
+    const byUser = users.map(u => ({ name: u.name, id: u.id, count: tasks.filter(t => t.assigneeId === u.id).length }));
+    printMessage('--- Task Statistics ---', 'info');
+    console.log(`Total tasks: ${total}`);
+    console.log(`Completed tasks: ${completed}`);
+    console.log(`Overdue tasks: ${overdue}`);
+    console.log('Tasks per user:');
+    byUser.forEach(u => {
+        console.log(`- ${u.name} (ID: ${u.id}): ${u.count}`);
+    });
 }
 
 async function handleGetTaskById() {
@@ -311,25 +444,34 @@ async function handleDeleteTask() {
     ]);
 
     const { confirmDelete } = await inquirer.prompt([
-        { type: 'confirm', name: 'confirmDelete', message: `Are you sure you want to delete task ID ${taskIdToDelete}?`, default: false }
+        { type: 'confirm', name: 'confirmDelete', message: `Are you sure you want to delete task ID ${taskIdToDelete}?` }
     ]);
 
     if (confirmDelete) {
         const deleted = await taskManager.deleteTask(Number(taskIdToDelete));
         if (deleted) {
-            printMessage(`Task with ID "${taskIdToDelete}" deleted.`, 'success');
+            printMessage(`Task ID ${taskIdToDelete} deleted successfully.`, 'success');
         } else {
-            printMessage(`Failed to delete task. Task not found.`, 'error');
+            printMessage(`Failed to delete task ID ${taskIdToDelete}.`, 'error');
         }
     } else {
-        printMessage('Deletion cancelled.', 'info');
+        printMessage('Task deletion cancelled.', 'info');
     }
 }
 
 async function handleAddUser() {
+    const users = taskManager.getAllUsers();
     const answers = await inquirer.prompt([
         { type: 'input', name: 'name', message: 'User Name:', validate: input => input ? true : 'Name cannot be empty.' },
-        { type: 'input', name: 'email', message: 'Email (optional):' },
+        { type: 'input', name: 'email', message: 'Email:',
+            validate: (input: string) => {
+                if (!input) return 'Email cannot be empty.';
+                const emailRegex = /^\S+@\S+\.\S+$/;
+                if (!emailRegex.test(input)) return 'Invalid email format.';
+                if (users.some(u => u.email && u.email.toLowerCase() === input.toLowerCase())) return 'Email already exists.';
+                return true;
+            }
+        }
     ]);
     const newUser = await taskManager.addUser(answers.name, answers.email);
     printMessage(`User "${newUser.name}" added with ID: ${newUser.id}`, 'success');
@@ -341,55 +483,40 @@ function handleListUsers() {
 }
 
 async function handleAssignTask() {
-    const tasks = taskManager.getAllTasks().filter(t => t.status !== TaskStatus.Done && t.status !== TaskStatus.Cancelled);
+    const tasks = taskManager.getAllTasks();
     const users = taskManager.getAllUsers();
-
     if (tasks.length === 0) {
-        printMessage('No active tasks available to assign.', 'info');
+        printMessage('No tasks available to assign.', 'info');
         return;
     }
     if (users.length === 0) {
         printMessage('No users available to assign tasks to.', 'info');
         return;
     }
-
     const { taskIdToAssign } = await inquirer.prompt([
         {
             type: 'list',
             name: 'taskIdToAssign',
             message: 'Select Task to assign:',
-            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id}, Current Assignee: ${task.assigneeId || 'None'})`, value: task.id })),
+            choices: tasks.map(task => ({ name: `${task.title} (ID: ${task.id})`, value: task.id })),
             pageSize: 10
         }
     ]);
-
     const { userIdToAssign } = await inquirer.prompt([
         {
             type: 'list',
             name: 'userIdToAssign',
-            message: 'Select User to assign to:',
-            choices: [{ name: 'Unassign Task', value: null }, ...users.map(user => ({ name: `${user.name} (ID: ${user.id})`, value: user.id }))],
+            message: 'Select User to assign task to:',
+            choices: users.map(user => ({ name: `${user.name} (ID: ${user.id})`, value: user.id })),
             pageSize: 10
         }
     ]);
-
-    const assigneeId = userIdToAssign === null ? undefined : Number(userIdToAssign);
-
-    const assignedTask = await taskManager.updateTask(Number(taskIdToAssign), { assigneeId: assigneeId });
-
-    if (assignedTask) {
-        if (assigneeId) {
-            printMessage(`Task "${assignedTask.title}" assigned to user ID "${assigneeId}".`, 'success');
-        } else {
-            printMessage(`Task "${assignedTask.title}" unassigned.`, 'success');
-        }
+    const updatedTask = await taskManager.assignTaskToUser(Number(taskIdToAssign), Number(userIdToAssign));
+    if (updatedTask) {
+        printMessage(`Task "${updatedTask.title}" assigned to user ID ${userIdToAssign}.`, 'success');
     } else {
-        printMessage(`Could not assign task. Task ID "${taskIdToAssign}" not found.`, 'warning');
+        printMessage('Failed to assign task.', 'error');
     }
 }
 
-
-mainLoop().catch(error => {
-    printMessage(`A critical error occurred: ${error instanceof Error ? error.message : String(error)}`, 'error');
-    process.exit(1);
-});
+mainLoop();
