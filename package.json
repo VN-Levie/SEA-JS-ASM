@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "@types/node": "^22.15.18",
     "chalk": "^5.4.1",
-    "cli-table3": "^0.6.5"
+    "cli-table3": "^0.6.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
