@@ -1,10 +1,8 @@
 import { Task, TaskStatus, TaskPriority } from '../models/Task';
 import { User } from '../models/User';
 import { IStorageService } from './storage/IStorageService';
-import { Singleton } from '../decorators/singletonDecorator';
 import { LogExecution, LogMethodIO } from '../decorators/loggingDecorators';
 
-@Singleton
 export class TaskManager {
     private tasks: Task[] = [];
     private users: User[] = [];
