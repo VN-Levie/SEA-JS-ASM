@@ -8,8 +8,8 @@ export class TaskManager {
     private users: User[] = [];
     private static instance: TaskManager;
 
-    private constructor(private storageService: IStorageService) {}
-    
+    private constructor(private storageService: IStorageService) { }
+
     public static getInstance(storageService: IStorageService): TaskManager {
         if (!TaskManager.instance) {
             TaskManager.instance = new TaskManager(storageService);
@@ -43,8 +43,23 @@ export class TaskManager {
     }
 
     @LogMethodIO
-    public getTaskById(id: string): Task | undefined {
-        return this.tasks.find(task => task.id === id);
+    public getTaskById(id: string): Task {
+        var task = new Task('test', 'test', TaskStatus.ToDo, TaskPriority.Low);
+        // return this.tasks.find(task => task.id === id);
+        for (let index = 0; index < this.tasks.length; index++) {
+            if (index == 0) {
+                console.log('Is task an instance of this.tasks[index]?', this.tasks[index] instanceof Task); // QUAN TRỌNG
+                console.log('Type of his.tasks[index]:', typeof this.tasks[index]); // Xem kiểu của thuộc tính update
+            }
+            const element: Task = this.tasks[index];
+            if (element.id === id) {
+                console.log('Is task an instance of element?', element instanceof Task); // QUAN TRỌNG
+                console.log('Type of element:', typeof element); // Xem kiểu của thuộc tính update
+                return element;
+            }
+
+        }
+        return task;
     }
 
     public getAllTasks(): Task[] {
@@ -53,8 +68,20 @@ export class TaskManager {
 
     @LogMethodIO
     public async updateTask(id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | undefined> {
-        const task = this.getTaskById(id);
+        const task: Task = this.getTaskById(id);
+        console.log('00:Is task an instance of Task?', task instanceof Task); // QUAN TRỌNG
+        console.log('00:Type of task:', typeof task); // Xem kiểu của thuộc tính update
+        const element: Task = this.tasks[0];
+        console.log('Is task an instance of element?', element instanceof Task); // QUAN TRỌNG
+        console.log('Type of element:', typeof element); // Xem kiểu của thuộc tính update
+
         if (task) {
+            console.log(`--- Debugging updateTask for ID: ${id} ---`);
+            console.log('Is task an instance of Task?', task instanceof Task); // QUAN TRỌNG
+            console.log('Type of task:', typeof task); // Xem kiểu của thuộc tính update
+            console.log('Type of task.update:', typeof (task as any).update); // Xem kiểu của thuộc tính update
+            console.log('Task object keys:', Object.keys(task));
+            console.log('Task prototype:', Object.getPrototypeOf(task));
             task.update(updates);
             await this.storageService.saveTasks(this.tasks);
             return task;
@@ -72,7 +99,7 @@ export class TaskManager {
         }
         return false;
     }
-    
+
     @LogMethodIO
     public async assignTaskToUser(taskId: string, userId: string): Promise<Task | undefined> {
         const task = this.getTaskById(taskId);
@@ -95,7 +122,7 @@ export class TaskManager {
     public getTasksByPriority(priority: TaskPriority): Task[] {
         return this.tasks.filter(task => task.priority === priority);
     }
-    
+
     @LogMethodIO
     public async addUser(name: string, email?: string): Promise<User> {
         const newUser = new User(name, email);

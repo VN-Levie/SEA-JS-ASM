@@ -49,7 +49,7 @@ export class JsonFileStorageService implements IStorageService {
     }
 
     async loadTasks(): Promise<Task[]> {
-        return this.readFile<Task>(TASKS_FILE_PATH, (data: any) => {
+        return this.readFile<Task>(TASKS_FILE_PATH, (data: any) => {          
             return new Task(
                 data.title,
                 data.description,
@@ -58,14 +58,26 @@ export class JsonFileStorageService implements IStorageService {
                 data.dueDate ? new Date(data.dueDate) : undefined,
                 data.assigneeId,
                 data.id,
-                data.createdAt ? new Date(data.createdAt) : undefined,
-                data.updatedAt ? new Date(data.updatedAt) : undefined
+                data.createdAt ? new Date(data.createdAt) : new Date(),
+                data.updatedAt ? new Date(data.updatedAt) : new Date()
             );
         });
     }
 
     async saveTasks(tasks: Task[]): Promise<void> {
-        await this.writeFile(TASKS_FILE_PATH, tasks);
+        // Convert Task instances to plain objects for JSON serialization
+        const plainTasks = tasks.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            status: task.status,
+            priority: task.priority,
+            dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+            assigneeId: task.assigneeId,
+            createdAt: task.createdAt ? task.createdAt.toISOString() : null,
+            updatedAt: task.updatedAt ? task.updatedAt.toISOString() : null
+        }));
+        await this.writeFile(TASKS_FILE_PATH, plainTasks);
     }
 
     async loadUsers(): Promise<User[]> {

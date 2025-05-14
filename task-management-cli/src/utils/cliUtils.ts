@@ -6,20 +6,22 @@ import { formatDate } from './dateUtils';
 
 export function displayTasks(tasks: Task[]): void {
     if (tasks.length === 0) {
-        console.log(chalk.yellow('No tasks to display.'));
+        console.log(chalk.yellow('\nNo tasks to display.'));
         return;
     }
 
     const table = new Table({
         head: [
-            chalk.cyan('ID'),
-            chalk.cyan('Title'),
-            chalk.cyan('Status'),
-            chalk.cyan('Priority'),
-            chalk.cyan('Due Date'),
-            chalk.cyan('Assignee ID'),
+            chalk.cyanBright.bold('ID'),
+            chalk.cyanBright.bold('Title'),
+            chalk.cyanBright.bold('Status'),
+            chalk.cyanBright.bold('Priority'),
+            chalk.cyanBright.bold('Due Date'),
+            chalk.cyanBright.bold('Assignee ID'),
+            chalk.cyanBright.bold('Description')
         ],
-        colWidths: [38, 30, 15, 12, 15, 38]
+        colWidths: [38, 30, 15, 12, 15, 38, 40],
+        wordWrap: true
     });
 
     tasks.forEach(task => {
@@ -44,41 +46,44 @@ export function displayTasks(tasks: Task[]): void {
             statusColor(task.status),
             priorityColor(task.priority),
             formatDate(task.dueDate),
-            task.assigneeId || 'N/A',
+            task.assigneeId || chalk.dim('N/A'),
+            task.description || chalk.dim('N/A')
         ]);
     });
-    console.log(table.toString());
+    console.log("\n" + table.toString());
 }
 
 export function displayUsers(users: User[]): void {
      if (users.length === 0) {
-        console.log(chalk.yellow('No users to display.'));
+        console.log(chalk.yellow('\nNo users to display.'));
         return;
     }
     const table = new Table({
-        head: [chalk.cyan('ID'), chalk.cyan('Name'), chalk.cyan('Email')],
+        head: [chalk.cyanBright.bold('ID'), chalk.cyanBright.bold('Name'), chalk.cyanBright.bold('Email')],
         colWidths: [38, 30, 30]
     });
     users.forEach(user => {
-        table.push([user.id, user.name, user.email || 'N/A']);
+        table.push([user.id, user.name, user.email || chalk.dim('N/A')]);
     });
-    console.log(table.toString());
+    console.log("\n" + table.toString());
 }
 
 export function printMessage(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info'): void {
+    let coloredMessage: string;
     switch (type) {
         case 'success':
-            console.log(chalk.green(message));
+            coloredMessage = chalk.bold.green(`✓ ${message}`);
             break;
         case 'error':
-            console.log(chalk.red(message));
+            coloredMessage = chalk.bold.red(`✗ ${message}`);
             break;
         case 'warning':
-            console.log(chalk.yellow(message));
+            coloredMessage = chalk.bold.yellow(`⚠ ${message}`);
             break;
         case 'info':
         default:
-            console.log(chalk.blue(message));
+            coloredMessage = chalk.bold.blue(`ℹ ${message}`);
             break;
     }
+    console.log(`\n${coloredMessage}`);
 }
