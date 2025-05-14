@@ -4,23 +4,20 @@ import { JsonFileStorageService } from './services/storage/JsonFileStorageServic
 import { IStorageService } from './services/storage/IStorageService';
 import { displayTasks, displayUsers, printMessage } from './utils/cliUtils';
 import { Task, TaskPriority, TaskStatus } from './models/Task';
-import { User } from './models/User';
-import chalk from 'chalk'; // Inquirer dùng chalk nên có thể tận dụng
+import chalk from 'chalk'; 
 import { parseNaturalDate } from './utils/dateUtils';
 
 const storageService: IStorageService = new JsonFileStorageService();
 const taskManager = TaskManager.getInstance(storageService);
 
-// --- Add process exit handler for auto-save ---
+
 let isSaving = false;
 async function saveOnExit() {
     if (isSaving) return;
     isSaving = true;
     try {
         await taskManager.saveAll();
-        // Optionally: console.log('Data saved on exit.');
-    } catch (e) {
-        // Optionally: console.error('Failed to save data on exit:', e);
+    } catch (e) {        
     }
 }
 process.on('SIGINT', async () => {
@@ -31,8 +28,7 @@ process.on('SIGTERM', async () => {
     await saveOnExit();
     process.exit();
 });
-process.on('exit', () => {
-    // Note: async not supported here, but for completeness
+process.on('exit', () => {   
     if (!isSaving) taskManager.saveAll();
 });
 // --- End process exit handler ---
@@ -96,9 +92,8 @@ async function mainLoop() {
                     break;
                 case 'exit':
                     printMessage('Exiting Task Manager. Goodbye!', 'info');
-                    isSaving = true; // Đánh dấu là đang lưu
-                    await taskManager.saveAll(); // Lưu dữ liệu trước khi thoát
-                    process.exit(0);
+                    isSaving = true; 
+                    await taskManager.saveAll();                   
                     return;
             }
         } catch (error) {
@@ -109,7 +104,7 @@ async function mainLoop() {
             }
         }
         await inquirer.prompt([{ type: 'input', name: 'continue', message: chalk.dim('\nPress Enter to continue...'), default: '' }]);
-        console.clear(); // Xóa màn hình cho menu tiếp theo (có thể không hoạt động trên mọi terminal)
+        console.clear();
     }
 }
 
