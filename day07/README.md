@@ -13,6 +13,10 @@
 - Thêm/xem danh sách user.
 - Dữ liệu được lưu tự động vào file JSON (auto-save khi thoát).
 - Có thể mở rộng lưu trữ qua API hoặc database.
+- **Đã hỗ trợ:**
+  - Đăng nhập xác thực user (theo ID/email, không trùng email, kiểm tra định dạng email).
+  - Thống kê nâng cao: tổng số task, số task hoàn thành, quá hạn, thống kê theo user.
+  - Lọc, tìm kiếm task nâng cao: theo trạng thái, ưu tiên, người nhận, quá hạn, từ khóa.
 
 ## 3. Lý do thiết kế
 
@@ -44,13 +48,12 @@
 - **Lưu trữ linh hoạt:** Có thể chuyển đổi giữa lưu file, API, DB qua interface `IStorageService`.
 - **Xử lý ngày tự nhiên:** Hỗ trợ nhập hạn chót dạng "7 days", "2024-06-30", "1 month"...
 - **Decorator logging:** Theo dõi log khi gọi các method nghiệp vụ.
+- **Đăng nhập user:** Đăng nhập bằng ID/email, kiểm tra trùng và định dạng email khi tạo user.
+- **Tìm kiếm, lọc, thống kê nâng cao:** Tìm kiếm theo từ khóa, lọc theo trạng thái, ưu tiên, người nhận, quá hạn, thống kê tổng hợp và theo user.
 
 ## 8. Định hướng mở rộng
 
-- Thêm chức năng thống kê, lọc, tìm kiếm nâng cao.
-- Thêm xác thực đăng nhập cho user.
-- Chuyển sang lưu dữ liệu bằng database thực thụ (SQLite, MongoDB, ...).
-- Xây dựng giao diện web hoặc app di động dựa trên nền tảng logic đã có.
+- Thêm xác thực mật khẩu cho user.
 
 ---
 
@@ -68,6 +71,7 @@ npm run dev
 ```
 
 > Nếu muốn build và chạy file đã biên dịch:
+>
 > ```bash
 > npm run build
 > npm start
@@ -83,5 +87,3 @@ npm run dev
 - `src/app.ts` - Điểm vào chính (CLI)
 
 ---
-
-
