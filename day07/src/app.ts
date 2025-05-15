@@ -2,10 +2,11 @@ import inquirer from 'inquirer';
 import { TaskManager } from './services/TaskManager';
 import { JsonFileStorageService } from './services/storage/JsonFileStorageService';
 import { IStorageService } from './services/storage/IStorageService';
-import { displayTasks, displayUsers, printMessage } from './utils/cliUtils';
+import { printMessage } from './utils/cliUtils';
 import { Task, TaskPriority, TaskStatus } from './models/Task';
-import chalk from 'chalk'; 
-import { parseNaturalDate } from './utils/dateUtils';
+import { User } from './models/User';
+import chalk from 'chalk';
+import { parseNaturalDate, formatDate } from './utils/dateUtils';
 
 const storageService: IStorageService = new JsonFileStorageService();
 const taskManager = TaskManager.getInstance(storageService);
@@ -18,7 +19,7 @@ async function saveOnExit() {
     isSaving = true;
     try {
         await taskManager.saveAll();
-    } catch (e) {        
+    } catch (e) {
     }
 }
 process.on('SIGINT', async () => {
@@ -29,10 +30,58 @@ process.on('SIGTERM', async () => {
     await saveOnExit();
     process.exit();
 });
-process.on('exit', () => {   
+process.on('exit', () => {
     if (!isSaving) taskManager.saveAll();
 });
-// --- End process exit handler ---
+
+function displayTasks(tasks: Task[]): void {
+    if (tasks.length === 0) {
+        console.log(chalk.yellow('\nNo tasks to display.'));
+        return;
+    }
+    console.log(chalk.bold.cyanBright('\n=== Task List ==='));
+    tasks.forEach(task => {
+        let statusColor = chalk.white;
+        switch (task.status) {
+            case TaskStatus.ToDo: statusColor = chalk.yellow; break;
+            case TaskStatus.InProgress: statusColor = chalk.blue; break;
+            case TaskStatus.Done: statusColor = chalk.green; break;
+            case TaskStatus.Cancelled: statusColor = chalk.gray; break;
+        }
+        let priorityColor = chalk.white;
+        switch (task.priority) {
+            case TaskPriority.Low: priorityColor = chalk.greenBright; break;
+            case TaskPriority.Medium: priorityColor = chalk.yellowBright; break;
+            case TaskPriority.High: priorityColor = chalk.redBright; break;
+        }
+        console.log(
+            chalk.bold('ID: ') + chalk.cyan(task.id) + '\n' +
+            chalk.bold('Title: ') + chalk.white(task.title) + '\n' +
+            chalk.bold('Status: ') + statusColor(task.status) + '\n' +
+            chalk.bold('Priority: ') + priorityColor(task.priority) + '\n' +
+            chalk.bold('Due Date: ') + chalk.magenta(formatDate(task.dueDate)) + '\n' +
+            chalk.bold('Assignee ID: ') + (task.assigneeId !== undefined ? chalk.cyan(task.assigneeId) : chalk.dim('N/A')) + '\n' +
+            chalk.bold('Description: ') + (task.description ? chalk.white(task.description) : chalk.dim('N/A')) + '\n' +
+            chalk.dim('─'.repeat(40))
+        );
+    });
+}
+
+function displayUsers(users: User[]): void {
+    if (users.length === 0) {
+        console.log(chalk.yellow('\nNo users to display.'));
+        return;
+    }
+    console.log(chalk.bold.cyanBright('\n=== User List ==='));
+    users.forEach(user => {
+        console.log(
+            chalk.bold('ID: ') + chalk.cyan(user.id) + '\n' +
+            chalk.bold('Name: ') + chalk.white(user.name) + '\n' +
+            chalk.bold('Email: ') + (user.email ? chalk.white(user.email) : chalk.dim('N/A')) + '\n' +
+            chalk.dim('─'.repeat(40))
+        );
+    });
+}
 
 async function loginFlow() {
     const users = taskManager.getAllUsers();
@@ -151,8 +200,8 @@ async function mainLoop() {
                     break;
                 case 'exit':
                     printMessage('Exiting Task Manager. Goodbye!', 'info');
-                    isSaving = true; 
-                    await taskManager.saveAll();                   
+                    isSaving = true;
+                    await taskManager.saveAll();
                     return;
             }
         } catch (error) {
@@ -463,7 +512,8 @@ async function handleAddUser() {
     const users = taskManager.getAllUsers();
     const answers = await inquirer.prompt([
         { type: 'input', name: 'name', message: 'User Name:', validate: input => input ? true : 'Name cannot be empty.' },
-        { type: 'input', name: 'email', message: 'Email:',
+        {
+            type: 'input', name: 'email', message: 'Email:',
             validate: (input: string) => {
                 if (!input) return 'Email cannot be empty.';
                 const emailRegex = /^\S+@\S+\.\S+$/;
